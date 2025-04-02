@@ -148,7 +148,6 @@
                         }
                         if ($employee->status == 'HARIAN') {
                             $calt = $employee->absent->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id)->sum('absent');
-                            // dd($calt, $$employee->area->total_harian);
                             $salary = ($employee->area->total_harian * $calt) ?? $employee->area->total_harian;
                         } else {
                             // Driver

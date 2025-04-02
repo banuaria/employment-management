@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Vendor;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -15,24 +17,26 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             UserSeeder::class,
+            AreaSeeder::class,
             ConfigSeeder::class,
-            TestimonySeeder::class,
-            LocationCategorySeeder::class,
-            LocationSeeder::class,
-            PostCategorySeeder::class,
-            PostSubcategorySeeder::class,
-            PostSeeder::class,
-            PostTagSeeder::class,
-            ContactSeeder::class,
-            AboutSeeder::class,
-            TermSeeder::class,
-            PolicySeeder::class,
-            FaqCategorySeeder::class,
-            FaqSeeder::class,
-            ProductCategorySeeder::class,
-            ProductSubcategorySeeder::class,
-            ProductSeeder::class,
-            ProductTagSeeder::class,
+            VendorSeeder::class,
+            // TestimonySeeder::class,
+            // LocationCategorySeeder::class,
+            // LocationSeeder::class,
+            // PostCategorySeeder::class,
+            // PostSubcategorySeeder::class,
+            // PostSeeder::class,
+            // PostTagSeeder::class,
+            // ContactSeeder::class,
+            // AboutSeeder::class,
+            // TermSeeder::class,
+            // PolicySeeder::class,
+            // FaqCategorySeeder::class,
+            // FaqSeeder::class,
+            // ProductCategorySeeder::class,
+            // ProductSubcategorySeeder::class,
+            // ProductSeeder::class,
+            // ProductTagSeeder::class,
         ]);
     }
 }

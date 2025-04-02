@@ -91,6 +91,12 @@ class EmployeeImport extends Component
                 continue;
             }
 
+           // **4. Validasi jika joindate kosong**
+            if (empty($row['joindate'])) {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Tanggal bergabung (joindate) tidak boleh kosong.";
+                continue;
+            }
+
             $filePairs[$pairKey] = true;
             // Check if employee exists in EmployeeMaster
             $employee = EmployeeMaster::where('nik', $nik)->first();
@@ -103,9 +109,9 @@ class EmployeeImport extends Component
                     'client'     => $row['client'] ?? null,
                     'area_id'    => $row['area'] ?? null,
                     'status'     => $row['status'] ?? null,
-                    'join_date'  => $joinDate,
+                    'join_date'  => $joinDate ?? null,
                     'nik'        => $nik,
-                    'name'       => $row['drivername'] ?? null,
+                    'name'       => $row['name'] ?? null,
                 ];
                 continue;
             }
@@ -139,7 +145,7 @@ class EmployeeImport extends Component
                 'status'     => $row['status'] ?? null,
                 'join_date'  => $joinDate,
                 'nik'        => $nik,
-                'name'       => $row['drivername'] ?? null,
+                'name'       => $row['name'] ?? null,
             ];
         }
     

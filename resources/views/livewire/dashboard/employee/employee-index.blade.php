@@ -12,13 +12,13 @@
                         <div class="relative w-full max-w-48">
                             <select wire:model.live.debounce.250ms="client" class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="" selected>Select Client</option>
-                                <option value="Security">Security</option>
-                                <option value="Office Boy">Office Boy</option>
-                                <option value="Express">Express</option>
-                                <option value="All Project">All Project</option>
-                                <option value="Cargo">Cargo</option>
-                                <option value="Shoppe">Shoppe</option>
-                                <option value="Tomoro">Tomoro</option>
+                                <option value="SECURITY">Security</option>
+                                <option value="OFFICE BOY">Office Boy</option>
+                                <option value="EXPRESS">Express</option>
+                                <option value="ALL PROJECT">All Project</option>
+                                <option value="CARGO">Cargo</option>
+                                <option value="SHOPEE">Shopee</option>
+                                <option value="TOMORO">Tomoro</option>
                             </select>
                         </div>
                         <div class="relative w-full max-w-48">

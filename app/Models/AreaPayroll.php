@@ -18,6 +18,45 @@ class AreaPayroll extends Model
     {
         return $this->hasMany(EmployeeMaster::class, 'area_id');
     }
+    
+    public function getSalaryEmpmloyeAttribute()
+    {
+        return $this->employeeMaster()
+        ->with('area', 'vendors', 'absent')
+        ->whereHas('absent', function ($query) use ($selectedMonthYear) {
+            $query->where('month_year', $selectedMonthYear . '-01');
+        })
+        ->get()
+        ->sum(function ($employee) use ($selectedMonthYear) {
+            $umk = $employee->area->umk;
+            $salary = 0;
+
+            // Perhitungan berdasarkan client
+            if (in_array($employee->client, ['Security', 'Office Boy'])) {
+                $salary = $umk;
+            } else {
+                $salary = ($umk >= 4000000) ? $umk * 0.80 : $umk * 0.90;
+            }
+
+            // Perhitungan berdasarkan status
+            if ($employee->status == 'HARIAN') {
+                $calt = $employee->absent->where('month_year', $selectedMonthYear)->sum('absent');
+                $salary = ($this->total_harian * $calt) ?: $this->total_harian;
+                // dd($salary);
+            } else {
+                $salary = ($umk >= 4000000) ? $umk * 0.80 : $umk * 0.90;
+            }
+
+            // Kalkulasi gaji berdasarkan vendor
+            $vendorSalary = 0;
+            foreach ($employee->vendors as $vendor) {
+                $vendorSalary += $salary;
+            }
+
+            return $vendorSalary;
+        });
+
+    }
 
     public function getTotalSalaryAttribute()
     {
@@ -38,7 +77,6 @@ class AreaPayroll extends Model
                 if (in_array($employee->client, ['Security', 'Office Boy'])) {
                     $salary = $umk;
                 } else {
-                    // Driver
                     $salary = ($umk >= 4000000) ? $umk * 0.80 : $umk * 0.90;
                 }
     
