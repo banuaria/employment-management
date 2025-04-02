@@ -13,6 +13,7 @@ class AbsentEdit extends Component
     public $vendor_id;
     public $employee_id;
     public $absent;
+    public $absent_bonus;
 
     #[On('close-modal')]
     public function closeModal()
@@ -28,6 +29,7 @@ class AbsentEdit extends Component
 
         $this->absentID  = $absentID;
         $this->absent = $absentID->absent;
+        $this->absent_bonus = $absentID->absent_bonus;
           
         $this->dispatch('open-modal', name: 'edit-absent-modal');
     }
@@ -43,6 +45,7 @@ class AbsentEdit extends Component
 
         $validated = $this->validate([
             'absent'  => ['required', 'numeric'],
+            'absent_bonus'  => ['required', 'numeric'],
         ]);
 
         $absentID->update($validated);

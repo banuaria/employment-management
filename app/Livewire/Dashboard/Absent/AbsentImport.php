@@ -3,7 +3,6 @@
 namespace App\Livewire\Dashboard\Absent;
 
 use App\Models\AbsentMonthlies;
-use App\Models\AreaPayroll;
 use App\Models\EmployeeMaster;
 use App\Models\Vendor;
 use Carbon\Carbon;
@@ -121,6 +120,7 @@ class AbsentImport extends Component
                 'vendor'    => $vendorName,
                 'nik'       => $nik,
                 'total'     => $row['absent'] ?? null,
+                'total_bonus'=> $row['absent_bonus'] ?? null
             ];
         }
     
@@ -153,6 +153,7 @@ class AbsentImport extends Component
             $monthYear = $employeeData['monthYear'];
             $monthYearFormat = Carbon::createFromFormat('Y-m', $monthYear)->format('Y-m-01');
             $absent = $employeeData['total'] ?? 0;
+            $absentBonus = $employeeData['total_bonus'] ?? 0;
 
 
             $vendor = Vendor::where('name', $vendorName)->first();
@@ -175,6 +176,7 @@ class AbsentImport extends Component
                 'vendor_id'   => $vendorId,
                 'month_year'  => $monthYearFormat,
                 'absent'      => $absent,
+                'absent_bonus'=> $absentBonus
             ]);
 
             if ($data) {

@@ -19,6 +19,7 @@ class AbsentMonthlies extends Model
         'vendor_id',
         'month_year',
         'absent',
+        'bonus_absent',
     ];
 
     public function employeeMaster()

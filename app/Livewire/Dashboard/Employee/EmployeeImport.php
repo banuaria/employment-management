@@ -46,7 +46,7 @@ class EmployeeImport extends Component
     
         // Read the Excel file and convert it into an array
         $data = Excel::toArray([], $this->employeeImport);
-    
+        
         // Ensure the sheet contains data
         if (empty($data) || empty($data[0])) {
             $this->dispatch('alert-failure', title: 'Excel file is empty or improperly formatted.');
