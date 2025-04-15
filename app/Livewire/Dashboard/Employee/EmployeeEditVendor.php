@@ -26,6 +26,11 @@ class EmployeeEditVendor extends Component
         $this->employees = EmployeeMaster::where('id', $id)->get();
         $this->vendors = Vendor::all();
 
+        // Refresh selected vendors
+        foreach ($this->employees as $employee) {
+            $this->selectedVendors[$employee->id] = $employee->vendors()->pluck('vendor_id')->toArray();
+        }
+
         $this->dispatch('open-modal', name: 'edit-vendor-employee-modal');
     }
 
@@ -35,27 +40,24 @@ class EmployeeEditVendor extends Component
 
         if (!$employee) return;
 
-        $success = false;
-
         if ($employee->vendors()->where('vendor_id', $vendorId)->exists()) {
-            $success = $employee->vendors()->detach($vendorId); 
-            $this->dispatch('alert-success', title: 'Vendor relationship updated successfully!');
+            $employee->vendors()->detach($vendorId);
+            $this->dispatch('alert-success', title: 'Vendor relationship removed successfully!');
         } else {
-            $success = $employee->vendors()->attach($vendorId); 
-            $this->dispatch('alert-success', title: 'Vendor relationship updated successfully!');
+            $employee->vendors()->attach($vendorId);
+            $this->dispatch('alert-success', title: 'Vendor relationship added successfully!');
         }
 
-        // Refresh selected vendors
         $this->selectedVendors[$employeeId] = $employee->vendors()->pluck('vendor_id')->toArray();
     }
 
     public function render()
     {
+        // Ensure selected vendors are updated for rendering
         foreach ($this->employees as $employee) {
             $this->selectedVendors[$employee->id] = $employee->vendors()->pluck('vendor_id')->toArray();
         }
 
         return view('livewire.dashboard.employee.employee-edit-vendor');
     }
-
 }

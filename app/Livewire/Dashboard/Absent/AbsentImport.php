@@ -52,17 +52,16 @@ class AbsentImport extends Component
         $data = Excel::toArray([], $this->employeeImport);
     
         // Ensure the sheet contains data
-        if (empty($data) || empty($data[0])) {
+        if (empty($data) || empty($data[1])) {
             $this->dispatch('alert-failure', title: 'Excel file is empty or improperly formatted.');
             return;
         }
     
         // Get the first sheet data
-        $rows = $data[0];
+        $rows = $data[1];
         // batas
-    
         // Extract headers from the first row
-        $headers = array_map('strtolower', array_map('trim', $rows[0])); // Normalize headers
+        $headers = array_map('strtolower', array_map('trim', $rows[0]));
         $filePairs = []; // Store (nik, vendor) pairs to check duplicates within the file
     
         $this->errors = [];
@@ -70,13 +69,26 @@ class AbsentImport extends Component
 
         for ($i = 1; $i < count($rows); $i++) {
             $row = array_combine($headers, $rows[$i]);
-
             // Standardize vendor & employee ID keys
             $vendorName = trim($row['vendor'] ?? '');
             $nik = trim($row['nik'] ?? '');
+            $status = trim($row['status'] ?? '');
+
+            // 1: REGULER | 2: LOADING | 3: HARIAN'
+            if($status == 'REGULER') {
+                $status = 1;
+            } elseif($status == 'LOADING') {
+                $status = 2;
+            } elseif($status == 'HARIAN') {
+                $status = 3;
+            } else {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid.";
+                continue;
+            }
+    
 
             // **1. Validasi jika NIK kosong**
-            if (empty($nik)) {
+            if (empty($nik)) { 
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK tidak boleh kosong.";
                 continue;
             }
@@ -104,9 +116,10 @@ class AbsentImport extends Component
             }
 
             // **5. Cek apakah kombinasi NIK dan Vendor ada di tabel pivot**
-            $existsInPivot = DB::table('employee_master_vendor')
-                ->where('employee_master_id', $employee->id)
+            $existsInPivot = DB::table('employee_masters')
+                ->where('nik', $nik)
                 ->where('vendor_id', $vendor->id)
+                ->where('status', $employee->status)
                 ->exists();
 
             if (!$existsInPivot) {
@@ -119,13 +132,13 @@ class AbsentImport extends Component
                 'monthYear' => $this->selectedMonthYear,
                 'vendor'    => $vendorName,
                 'nik'       => $nik,
-                'total'     => $row['absent'] ?? null,
-                'total_bonus'=> $row['absent_bonus'] ?? null
+                'status'    => $status,
+                'total'     => $row['total'] ?? null,
+                'total_bonus'=> $row['total_bonus'] ?? null
             ];
         }
     
         $this->employees = $formattedData;
-    
         $this->stat = empty($this->errors) ? 1 : 0;
     }
     
@@ -151,6 +164,7 @@ class AbsentImport extends Component
             $nik = $employeeData['nik'];
             $vendorName = $employeeData['vendor'];
             $monthYear = $employeeData['monthYear'];
+            $status = $employeeData['status'];
             $monthYearFormat = Carbon::createFromFormat('Y-m', $monthYear)->format('Y-m-01');
             $absent = $employeeData['total'] ?? 0;
             $absentBonus = $employeeData['total_bonus'] ?? 0;
@@ -163,6 +177,7 @@ class AbsentImport extends Component
 
             $existingAbsence = AbsentMonthlies::where([
                 'employee_id' => $employeer->id,
+                'status'    => $status,
                 'vendor_id' => $vendor->id,
                 'month_year' => $monthYear,
             ])->exists();
@@ -174,9 +189,10 @@ class AbsentImport extends Component
             $data = AbsentMonthlies::create([
                 'employee_id' => $employeeId,
                 'vendor_id'   => $vendorId,
+                'status'      => $status,
                 'month_year'  => $monthYearFormat,
                 'absent'      => $absent,
-                'absent_bonus'=> $absentBonus
+                'bonus_absent'=> $absentBonus
             ]);
 
             if ($data) {

@@ -12,6 +12,7 @@ class EmployeeMaster extends Model
     protected $fillable = [
         'client',
         'area_id',
+        'vendor_id',
         'status',
         'join_date',
         'resign_date',
@@ -19,10 +20,20 @@ class EmployeeMaster extends Model
         'name',
     ];
 
+    public function getStatusNameAttribute()
+    {
+        return match ($this->status) {
+            1 => 'REGULER',
+            2 => 'LOADING',
+            3 => 'HARIAN',
+            default => 'UNKNOWN',
+        };
+    }
+
 
     public function vendors()
     {
-        return $this->belongsToMany(Vendor::class, 'employee_master_vendor');
+        return $this->belongsTo(Vendor::class, 'vendor_id');
     }
 
     public function area()

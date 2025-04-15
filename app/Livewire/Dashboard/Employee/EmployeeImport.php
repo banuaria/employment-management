@@ -52,12 +52,12 @@ class EmployeeImport extends Component
             $this->dispatch('alert-failure', title: 'Excel file is empty or improperly formatted.');
             return;
         }
-    
-        // Get the first sheet data
+        
         $rows = $data[0];
     
         // Extract headers from the first row
         $headers = array_map('strtolower', array_map('trim', $rows[0])); // Normalize headers
+        // dd($headers);
     
         // Prepare the formatted data
         $formattedData = [];
@@ -66,10 +66,27 @@ class EmployeeImport extends Component
     
         for ($i = 1; $i < count($rows); $i++) {
             $row = array_combine($headers, $rows[$i]);
+            // dd($row);
     
             // Standardize vendor & employee ID keys
             $vendorName = trim($row['vendorname'] ?? '');
+            // dd($vendorName);
+            $vendorId = Vendor::where('name', $vendorName)->first()->id ?? null;
+
             $nik = trim($row['nik'] ?? '');
+            $status = trim($row['status'] ?? '');
+
+            // 1: REGULER | 2: LOADING | 3: HARIAN'
+            if($status == 'REGULER') {
+                $status = 1;
+            } elseif($status == 'LOADING') {
+                $status = 2;
+            } elseif($status == 'HARIAN') {
+                $status = 3;
+            } else {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid.";
+                continue;
+            }
     
             // Check for duplicate (nik, vendorname) pairs **inside the file itself**
             // **1. Validasi jika NIK kosong**
@@ -85,9 +102,9 @@ class EmployeeImport extends Component
             }
 
             // **3. Validasi duplikat (NIK, Vendor) dalam file**
-            $pairKey = $nik . '|' . $vendorName;
+            $pairKey = $nik . '|' . $vendorName . '|' . $status;
             if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file.";
                 continue;
             }
 
@@ -97,6 +114,13 @@ class EmployeeImport extends Component
                 continue;
             }
 
+              // Check if vendor exists
+            $vendor = Vendor::where('name', $vendorName)->first();
+              if (!$vendor) {
+                  $this->errors[] = "Error pada baris " . ($i + 1) . ": Vendor '$vendorName' tidak ditemukan di database.";
+                  continue;
+              }
+
             $filePairs[$pairKey] = true;
             // Check if employee exists in EmployeeMaster
             $employee = EmployeeMaster::where('nik', $nik)->first();
@@ -105,44 +129,43 @@ class EmployeeImport extends Component
             if (!$employee) {
                 $joinDate = isset($row['joindate']) ? $this->convertExcelDate($row['joindate']) : null;
                 $formattedData[] = [
-                    'vendor'     => $vendorName,
+                    'vendor_id'   => $vendorId,
                     'client'     => $row['client'] ?? null,
                     'area_id'    => $row['area'] ?? null,
-                    'status'     => $row['status'] ?? null,
+                    'status'     => $status,
                     'join_date'  => $joinDate ?? null,
                     'nik'        => $nik,
                     'name'       => $row['name'] ?? null,
                 ];
                 continue;
             }
+
+            // dd($formattedData);
     
-            // Check if vendor exists
-            $vendor = Vendor::where('name', $vendorName)->first();
-            if (!$vendor) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Vendor '$vendorName' tidak ditemukan di database.";
-                continue;
-            }
     
             // Check if the employee/vendor pair already exists in the pivot table
-            $existsInPivot = DB::table('employee_master_vendor')
-                ->where('employee_master_id', $employee->id)
-                ->where('vendor_id', $vendor->id)
+            $existsInPivot = DB::table('employee_masters')
+                ->where('nik', $nik)
+                ->where('vendor_id', $vendorId)
+                ->where('status', $status)
                 ->exists();
     
             if ($existsInPivot) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah terdaftar dengan vendor $vendorName di database.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik dengan role $status sudah terdaftar dengan vendor $vendorName di database.";
                 continue;
             }
     
             // Convert date
             $joinDate = isset($row['joindate']) ? $this->convertExcelDate($row['joindate']) : null;
+
+
     
             // Store valid data
             $formattedData[] = [
-                'vendor'     => $vendorName,
+                'vendor_id'  => $vendorId,
                 'client'     => $row['client'] ?? null,
                 'area_id'    => $row['area'] ?? null,
-                'status'     => $row['status'] ?? null,
+                'status'     => $status,
                 'join_date'  => $joinDate,
                 'nik'        => $nik,
                 'name'       => $row['name'] ?? null,
@@ -166,69 +189,78 @@ class EmployeeImport extends Component
     
     public function store()
     {
-       // Check if there are any employee data to store
         if (empty($this->employees)) {
             $this->dispatch('alert-failure', title: 'No data to store, please check the uploaded file.');
             return;
         }
 
-        $nikMap = []; // Untuk memastikan hanya satu EmployeeMaster per NIK
+        $nikMap = [];
+        $batchData = [];
 
         foreach ($this->employees as $employeeData) {
             $nik = $employeeData['nik'];
-            $vendorName = $employeeData['vendor'];
-
+            $vendorId = $employeeData['vendor_id'];
             $area = AreaPayroll::where('area', $employeeData['area_id'])->first();
-            $areaId = $area ? $area->id : null; // Jika tidak ditemukan, set null
+            $areaId = $area ? $area->id : null;
 
-            // Cek apakah employee dengan NIK ini sudah ada di database
             $emp = EmployeeMaster::where('nik', $nik)->first();
 
+            // Add the employee to the batch if it doesn't exist
             if (!$emp) {
-                // Jika belum ada di database dan belum dibuat dalam iterasi ini, buat baru
-                if (!isset($nikMap[$nik])) {
-                    $emp = EmployeeMaster::create([
-                        'client'     => $employeeData['client'],
-                        'status'     => $employeeData['status'],
-                        'join_date'  => $employeeData['join_date'],
-                        'nik'        => $nik,
-                        'area_id'    => $areaId,
-                        'name'       => $employeeData['name'],
-                    ]);
+                $batchData[] = [
+                    'client'     => $employeeData['client'],
+                    'status'     => $employeeData['status'],
+                    'join_date'  => $employeeData['join_date'],
+                    'vendor_id'  => $vendorId,
+                    'nik'        => $nik,
+                    'area_id'    => $areaId,
+                    'name'       => $employeeData['name'],
+                ];
 
-                    // Simpan reference agar tidak membuat duplikat
-                    $nikMap[$nik] = $emp;
-                }
+                // Mark the NIK as processed
+                $nikMap[$nik] = true;
             } else {
-                // Jika sudah ada di database, gunakan yang sudah ada
-                $nikMap[$nik] = $emp;
-            }
-
-            // Proses vendor (relasi di pivot table)
-            if ($vendorName) {
-                // Cek apakah vendor ada di database
-                $vendor = Vendor::where('name', $vendorName)->first();
-
-                if ($vendor) {
-                    // Cek apakah pasangan (employee, vendor) sudah ada di pivot table
-                    $existsInPivot = DB::table('employee_master_vendor')
-                        ->where('employee_master_id', $emp->id)
-                        ->where('vendor_id', $vendor->id)
-                        ->exists();
-
-                    if (!$existsInPivot) {
-                        $emp->vendors()->attach($vendor->id);
-                    }
-                }
-            }
-
-            if ($emp && $vendor) {
-                $this->dispatch('employee-imported');
-                $this->dispatch('close-modal', name: 'import-employee-modal');
-                $this->dispatch('alert-success', title: 'Employee Successfully Imported!');
-            } else {
-                $this->dispatch('alert-failure', title: 'Failed to Import Employee');
+                $nikMap[$nik] = $emp ?? null;
             }
         }
+
+        // Perform batch insert if there is new employee data to insert
+        if (!empty($batchData)) {
+            $insertedEmployees = EmployeeMaster::insert($batchData);
+        }
+
+        // Now process the vendor associations for both new and existing employees
+        // foreach ($this->employees as $employeeData) {
+        //     $nik = $employeeData['nik'];
+        //     $area = AreaPayroll::where('area', $employeeData['area_id'])->first();
+        //     $employeAreaId = $area ? $area->id : null;
+
+        //     $status = $employeeData['status'];
+        //     $vendorName = $employeeData['vendor'];
+        //     $emp = EmployeeMaster::where('nik', $nik)->first();
+
+        //     // Process vendor in batch if employee exists
+        //     if ($vendorName && $emp) {
+        //         $vendor = Vendor::where('name', $vendorName)->first();
+        //         if ($vendor) {
+        //             $existsInPivot = DB::table('employee_master_vendor')
+        //                 ->where('employee_master_id', $emp->id)
+        //                 ->where('vendor_id', $vendor->id)
+        //                 ->where('status', $status)
+        //                 ->exists();
+
+        //                 if (!$existsInPivot) {
+        //                     $emp->vendors()->attach($vendor->id, [
+        //                         'status'    => $status,
+        //                         'area_id'   => $employeAreaId,
+        //                     ]);
+        //                 }
+        //         }
+        //     }
+        // }
+        $this->dispatch('employee-imported');
+        $this->dispatch('close-modal', name: 'import-employee-modal');
+        $this->dispatch('alert-success', title: 'Employee Successfully Imported!');
     }
+
 }

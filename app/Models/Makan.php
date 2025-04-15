@@ -15,12 +15,24 @@ class Makan extends Model
         'employee_id',
         'vendor_id',
         'month_year',
+        'status',
         'total',
         'total_mel',
         'total_unit',
         'total_loading',
 
     ];
+
+    public function getStatusNameAttribute()
+    {
+        return match ($this->status) {
+            1 => 'REGULER',
+            2 => 'LOADING',
+            3 => 'HARIAN',
+            default => 'UNKNOWN',
+        };
+    }
+
 
     public function employeeMaster()
     {

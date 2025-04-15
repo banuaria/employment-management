@@ -56,14 +56,26 @@
         <div class="mt-4">
             <x-input-label for="status-employee-create" :value="__('Status')" />
             <select wire:model="status" id="status-employee-create" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                <option value="" disabled selected>Select Status</option>
-                <option value="REGULER">REGULER</option>
-                <option value="LOADING">LOADING</option>
-                <option value="HARIAN">HARIAN</option>
+                <option value="" disabled {{ $this->status == null ? 'selected' : '' }}>Select Status</option>
+                <option value="1">REGULER</option>
+                <option value="2">LOADING</option>
+                <option value="3">HARIAN</option>
             </select>
             <x-input-error :messages="$errors->get('status')" class="mt-2" />
         </div>
-
+        <!-- Vendor -->
+        <div class="mt-4">
+            <x-input-label for="vendor-employee-edit" :value="__('Vendor')" />
+            <select wire:model="vendor_id" id="vendor-employee-edit"
+                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="" disabled {{ $vendor_id == null ? 'selected' : '' }}>Select Vendor</option>
+                @foreach ($vendors as $id => $name)
+                    <option value="{{ $id }}">{{ $name }}</option>
+                @endforeach
+            </select>
+            <p class="text-xs text-gray-400 mt-2">Vendor terpilih: {{ $vendor_id }}</p>
+            <x-input-error :messages="$errors->get('vendor_id')" class="mt-2" />
+        </div>
         <div class="flex space-x-4 mt-4">
             <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">
                 <x-icon-loading wire:loading.delay wire:target="store" class="w-4 h-4 fill-indigo-600 text-gray-200 animate-spin"></x-icon-loading>

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('employee_id')->constrained('employee_masters')->onDelete('cascade');
             $table->foreignId('vendor_id')->constrained('vendors')->onDelete('cascade');
+            $table->unsignedInteger('status')->comment('1: REGULER | 2: LOADING | 3: HARIAN')->nullable();
             $table->date('month_year');
             $table->string('absent');
         });

@@ -126,6 +126,7 @@ class ProductEdit extends Component
             $this->product_subcategories = ProductSubcategory::where('product_category_id', $this->product_category_id)->pluck('title', 'id');
             $this->product_tags = ProductTag::where('product_category_id', $this->product_category_id)->pluck('title', 'id');
         }
+        
         $this->product_photos = $this->product_photo_paths;
         $this->stores_default = Store::pluck('title', 'id');
         $this->stores = $this->stores_default;

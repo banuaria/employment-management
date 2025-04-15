@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard\Employee;
 
 use App\Models\AreaPayroll;
 use App\Models\EmployeeMaster;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -50,6 +51,19 @@ class EmployeeCreate extends Component
         $emp = EmployeeMaster::create($validated);
 
         if ($emp) {
+            $existsInPivot = DB::table('employee_master_vendor')
+            ->where('employee_master_id', $emp->id)
+            ->where('vendor_id', $validated['vendor_id'])
+            ->where('status', $validated['status'])
+            ->exists();
+
+            if (!$existsInPivot) {
+                $emp->vendors()->attach($validated['vendor_id'], [
+                    'status'   => $validated['status'],
+                    'area_id'  => $validated['area_id'],
+                ]);
+            }
+            
             $this->dispatch('employee-created');
             $this->dispatch('close-modal', name: 'create-employee-modal');
             $this->dispatch('alert-success', title: 'Employee Successfully Created!');

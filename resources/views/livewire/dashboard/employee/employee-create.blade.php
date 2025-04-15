@@ -55,9 +55,9 @@
             <x-input-label for="status-employee-create" :value="__('Status')" />
             <select wire:model="status" id="status-employee-create" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                 <option value="" disabled selected>Select Status</option>
-                <option value="REGULER">REGULER</option>
-                <option value="LOADING">LOADING</option>
-                <option value="HARIAN">HARIAN</option>
+                <option value="1">REGULER</option>
+                <option value="2">LOADING</option>
+                <option value="3">HARIAN</option>
             </select>
             <x-input-error :messages="$errors->get('status')" class="mt-2" />
         </div>

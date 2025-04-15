@@ -70,7 +70,13 @@
                                         Vendor
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Status
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Total Absent
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Total Bonus Absent
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">Action</th>
                                 </tr>
@@ -86,12 +92,15 @@
                                         <td class="px-4 py-3 border-r">
                                             {{ $value->vendors->name }}
                                         </td>
+                                        <td class="px-4 py-3 border-r">
+                                            {{ $value->status_name }}
+                                        </td>
                                         <td class="px-4 py-3 border-r">{{ $value->absent }}</td>
+                                        <td class="px-4 py-3 border-r">{{ $value->bonus_absent }}</td>
                                         <td class="px-4 py-2 border-r w-0">
                                             <div class="flex justify-center items-center space-x-2">
                                                     <button wire:click="$dispatchTo('dashboard.absent.absent-edit', 'edited', { id: {{ $value->id }} })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500"><x-icon-edit class="w-3.5 h-3.5"></x-icon-edit></button>
                                                     <button wire:click="$dispatch('alert-confirmation', { to: 'dashboard.absent.absent-index', data: { do: 'delete', 'id': {{ $value->id }} }, title: `Are you sure to delete {{ $value->employeeMaster->name }}?` })" type="button" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-500 active:bg-red-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500"><x-icon-trash class="w-3.5 h-3.5"></x-icon-trash></button>
-                                              
                                             </div>
                                         </td>
                                     </tr>

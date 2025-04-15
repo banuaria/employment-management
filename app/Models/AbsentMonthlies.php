@@ -19,8 +19,20 @@ class AbsentMonthlies extends Model
         'vendor_id',
         'month_year',
         'absent',
-        'bonus_absent',
+        'status',
+        'absnent_bonus',
     ];
+
+    public function getStatusNameAttribute()
+    {
+        return match ($this->status) {
+            1 => 'REGULER',
+            2 => 'LOADING',
+            3 => 'HARIAN',
+            default => 'UNKNOWN',
+        };
+    }
+
 
     public function employeeMaster()
     {

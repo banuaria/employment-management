@@ -24,9 +24,9 @@
                         <div class="relative w-full max-w-48">
                             <select wire:model.live.debounce.250ms="status" class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="" selected>Select Status</option>
-                                <option value="REGULER">REGULER</option>
-                                <option value="LOADING">LOADING</option>
-                                <option value="HARIAN">HARIAN</option>
+                                <option value="1">REGULER</option>
+                                <option value="2">LOADING</option>
+                                <option value="3">HARIAN</option>
                             </select>
                         </div>
                         <div class="relative w-full max-w-48">
@@ -118,29 +118,28 @@
                                         <td class="px-4 py-3 border text-center w-0"><div class="py-1.5">{{ $employMaster->firstItem() + $key }}</div></td>
                                         <td class="px-4 py-3 border-r">{{ $value->nik }}</td>
                                         <td class="px-4 py-3 border-r">
-                                            @if ($value->vendors->isNotEmpty())
-                                                {{ $value->vendors->pluck('name')->join(', ') }}
-                                            @else
-                                                -
-                                            @endif
+                                          {{$value->vendors->name}}
                                         </td>
                                         <td class="px-4 py-3 border-r">{{ $value->client }}</td>    
                                         <td class="px-4 py-3 border-r">{{ $value->name }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->join_date ? \Carbon\Carbon::parse( $value->join_date )->translatedFormat('M d, Y') : '-'  }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->resign_date ? \Carbon\Carbon::parse( $value->resign_date )->translatedFormat('M d, Y') : '-'  }}</td>
-                                       
+                                    
                                         <td class="px-4 py-3 border-r">{{ $value->area->area }}</td>
-                                        <td class="px-4 py-3 border-r">{{ $value->status }}</td>
+                                        <td class="px-4 py-3 border-r">
+                                            {{ $value->status_name }}
+                                        </td>
                                         <td class="px-4 py-2 border-r w-0">
                                             <div class="flex justify-center items-center space-x-2">
-                                                    <button wire:click="$dispatchTo('dashboard.employee.employee-edit-vendor', 'vendor-edited', { id: {{ $value->id }} })" type="button" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-500 active:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500"><x-icon-lock-time class="w-3.5 h-3.5"></x-icon-lock-time></button>
-
+                                                    {{-- <button wire:click="$dispatchTo('dashboard.employee.employee-edit-vendor', 'vendor-edited', { id: {{ $value->id }} })" type="button" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-500 active:bg-gray-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500"><x-icon-lock-time class="w-3.5 h-3.5"></x-icon-lock-time></button> --}}
                                                     <button wire:click="$dispatchTo('dashboard.employee.employee-edit', 'edited', { id: {{ $value->id }} })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500"><x-icon-edit class="w-3.5 h-3.5"></x-icon-edit></button>
                                                     <button wire:click="$dispatch('alert-confirmation', { to: 'dashboard.employee.employee-index', data: { do: 'delete', 'id': {{ $value->id }} }, title: `Are you sure to delete {{ $value->name }}?` })" type="button" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-500 active:bg-red-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500"><x-icon-trash class="w-3.5 h-3.5"></x-icon-trash></button>
-                                              
+                                            
                                             </div>
                                         </td>
                                     </tr>
+                                        {{-- @foreach ($value->vendors as $vendor)
+                                        @endforeach --}}
                                     @endforeach
                                 @else
                                     <tr class="bg-white border-b">

@@ -15,10 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('client')->nullable();
             $table->foreignId('area_id')->constrained('area_payrolls')->onDelete('cascade');
-            $table->string('status')->nullable();
+            $table->unsignedInteger('status')->comment('1: REGULER | 2: LOADING | 3: HARIAN')->nullable();
+            $table->unsignedInteger('vendor_id')->constrained('vendors')->onDelete('cascade');
             $table->date('join_date')->nullable();
             $table->date('resign_date')->nullable();
-            $table->string('nik')->unique();
+            $table->string('nik')->nullable();
             $table->string('name');
             $table->timestamps();
         });

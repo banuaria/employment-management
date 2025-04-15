@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard\Employee;
 
 use App\Models\AreaPayroll;
 use App\Models\EmployeeMaster;
+use App\Models\Vendor;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -11,9 +12,11 @@ class EmployeeEdit extends Component
 {
     public $employeID;
     public string $client = '';
-    public string $status = '';
+    public $status;
     public $join_date;
     public $resign_date;
+    public $vendor_id;
+    public $vendors = [];
     public $nik;
     public string $name = '';
     public int $area_id;
@@ -30,21 +33,19 @@ class EmployeeEdit extends Component
     public function edited($id)
     {
         $employeID = EmployeeMaster::find($id);
-
         $this->employeID  = $employeID;
         $this->client = $employeID->client;
         $this->status  = $employeID->status;
+        // vendor
+        $this->vendor_id = $employeID->vendor_id;
+        $this->vendors = Vendor::pluck('name', 'id')->toArray();      
+      
         $this->join_date = $employeID->join_date;
         $this->resign_date = $employeID->resign_date;
         $this->nik = $employeID->nik;
         $this->name  = $employeID->name;
         $this->area_id = $employeID->area_id;
         $this->areas = AreaPayroll::pluck('area', 'id')->toArray();
-
-        // if (!empty($this->areas)) {
-        //     $this->areas = AreaPayroll::where('id', $this->area_id)
-        //     ->pluck('area', 'id');
-        // }
         $this->dispatch('open-modal', name: 'edit-employee-modal');
     }
 
