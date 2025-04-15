@@ -53,13 +53,13 @@ class LemburImport extends Component
         $data = Excel::toArray([], $this->employeeImport);
     
         // Ensure the sheet contains data
-        if (empty($data) || empty($data[0])) {
+        if (empty($data) || empty($data[2])) {
             $this->dispatch('alert-failure', title: 'Excel file is empty or improperly formatted.');
             return;
         }
     
         // Get the first sheet data
-        $rows = $data[0];
+        $rows = $data[2];
         // batas
     
         // Extract headers from the first row
@@ -76,6 +76,20 @@ class LemburImport extends Component
             $vendorName = trim($row['vendor'] ?? '');
             $nik = trim($row['nik'] ?? '');
 
+            $status = trim($row['status'] ?? '');
+
+            // 1: REGULER | 2: LOADING | 3: HARIAN'
+            if($status == 'REGULER') {
+                $status = 1;
+            } elseif($status == 'LOADING') {
+                $status = 2;
+            } elseif($status == 'HARIAN') {
+                $status = 3;
+            } else {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid.";
+                continue;
+            }
+
             // **1. Validasi jika NIK kosong**
             if (empty($nik)) {
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK tidak boleh kosong.";
@@ -83,11 +97,12 @@ class LemburImport extends Component
             }
 
             // **2. Validasi duplikat (NIK, Vendor) dalam file**
-            $pairKey = $nik . '|' . $vendorName;
+            $pairKey = $nik . '|' . $vendorName . '|' . $status;
             if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file.";
                 continue;
             }
+
             $filePairs[$pairKey] = true;
 
             // **3. Cek apakah employee (NIK) ada di database**
@@ -105,10 +120,12 @@ class LemburImport extends Component
             }
 
             // **5. Cek apakah kombinasi NIK dan Vendor ada di tabel pivot**
-            $existsInPivot = DB::table('employee_master_vendor')
-                ->where('employee_master_id', $employee->id)
-                ->where('vendor_id', $vendor->id)
-                ->exists();
+            $existsInPivot = DB::table('employee_masters')
+            ->where('nik', $nik)
+            ->where('vendor_id', $vendor->id)
+            ->where('status', $employee->status)
+            ->exists();
+
 
             if (!$existsInPivot) {
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik tidak terdaftar pada vendor '$vendorName'.";
@@ -120,6 +137,7 @@ class LemburImport extends Component
                 'monthYear' => $this->selectedMonthYear,
                 'vendor'    => $vendorName,
                 'nik'       => $nik,
+                'status'    => $status,
                 'total'     => $row['total'] ?? null,
             ];
         }
@@ -150,6 +168,7 @@ class LemburImport extends Component
         foreach ($this->employees as $employeeData) {
             $nik = $employeeData['nik'];
             $vendorName = $employeeData['vendor'];
+            $status = $employeeData['status'];
             $monthYear = $employeeData['monthYear'];
             $monthYearFormat = Carbon::createFromFormat('Y-m', $monthYear)->format('Y-m-01');
             $lembur = $employeeData['total'] ?? 0;
@@ -163,6 +182,7 @@ class LemburImport extends Component
             $existingAbsence = Lembur::where([
                 'employee_id' => $employeer->id,
                 'vendor_id' => $vendor->id,
+                'status' => $status,
                 'month_year' => $monthYear,
             ])->exists();
 
@@ -173,6 +193,7 @@ class LemburImport extends Component
             $data = Lembur::create([
                 'employee_id' => $employeeId,
                 'vendor_id'   => $vendorId,
+                'status'      => $status,
                 'month_year'  => $monthYearFormat,
                 'total'       => $lembur,
             ]);

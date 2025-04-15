@@ -94,11 +94,12 @@ class AbsentImport extends Component
             }
 
             // **2. Validasi duplikat (NIK, Vendor) dalam file**
-            $pairKey = $nik . '|' . $vendorName;
+            $pairKey = $nik . '|' . $vendorName . '|' . $status;
             if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file.";
                 continue;
             }
+
             $filePairs[$pairKey] = true;
 
             // **3. Cek apakah employee (NIK) ada di database**
