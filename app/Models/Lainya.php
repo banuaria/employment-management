@@ -13,9 +13,21 @@ class Lainya extends Model
         'employee_id',
         'vendor_id',
         'month_year',
+        'status',
         'total',
     ];
 
+    public function getStatusNameAttribute()
+    {
+        return match ($this->status) {
+            1 => 'REGULER',
+            2 => 'LOADING',
+            3 => 'HARIAN',
+            default => 'UNKNOWN',
+        };
+    }
+
+    
     public function employeeMaster()
     {
         return $this->belongsTo(EmployeeMaster::class, 'employee_id');

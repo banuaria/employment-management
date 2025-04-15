@@ -18,9 +18,9 @@ class AbsentMonthlies extends Model
         'employee_id',
         'vendor_id',
         'month_year',
-        'absent',
         'status',
-        'absnent_bonus',
+        'absent',
+        'bonus_absent',
     ];
 
     public function getStatusNameAttribute()
