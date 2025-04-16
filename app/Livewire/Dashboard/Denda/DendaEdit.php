@@ -39,14 +39,14 @@ class DendaEdit extends Component
 
     public function store()
     {
-        $makanID = $this->makanID;
+        $DendaSLAID = $this->DendaSLAID;
         $validated = $this->validate([
             'total'  => ['required', 'numeric'],
         ]);
 
-        $makanID->update($validated);
+        $DendaSLAID->update($validated);
 
-        if ($makanID) {
+        if ($DendaSLAID) {
             $this->dispatch('denda-edited');
             $this->dispatch('close-modal', name: 'edit-denda-modal');
             $this->dispatch('alert-success', title: 'Denda SLA Successfully Edited!');

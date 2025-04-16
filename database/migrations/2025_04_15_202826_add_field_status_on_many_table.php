@@ -36,6 +36,10 @@ return new class extends Migration
             $table->unsignedInteger('status')->comment('1: REGULER | 2: LOADING | 3: HARIAN')->nullable();
         });
 
+        Schema::table('denda_bbms', function($table) {
+            $table->unsignedInteger('status')->comment('1: REGULER | 2: LOADING | 3: HARIAN')->nullable();
+        });
+
     } 
 
     /**
@@ -65,6 +69,9 @@ return new class extends Migration
             $table->dropColumn('status');
         });
         Schema::table('cleanings', function($table) {
+            $table->dropColumn('status');
+        });
+        Schema::table('denda_bbms', function($table) {
             $table->dropColumn('status');
         });
     }

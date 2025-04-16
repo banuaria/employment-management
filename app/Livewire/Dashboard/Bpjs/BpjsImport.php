@@ -45,76 +45,82 @@ class BpjsImport extends Component
         $this->validate([
             'employeeImport' => ['required', 'file', 'mimes:xlsx,csv'],
         ]);
-      
     
-        // Read the Excel file and convert it into an array
         $data = Excel::toArray([], $this->employeeImport);
     
-        // Ensure the sheet contains data
-        if (empty($data) || empty($data[0])) {
-            $this->dispatch('alert-failure', title: 'Excel file is empty or improperly formatted.');
+        if (empty($data) || empty($data[11]) || empty($data[12])) {
+            $this->dispatch('alert-failure', title: 'Sheet 11 atau 12 kosong atau tidak ditemukan.');
             return;
         }
     
-        // Get the first sheet data
-        $rows = $data[0];
+        // Normalisasi headers dari kedua sheet
+        $headersSheet11 = array_map('strtolower', array_map('trim', $data[11][0]));
+        $headersSheet12 = array_map('strtolower', array_map('trim', $data[12][0]));
     
-        // Extract headers from the first row
-        $headers = array_map('strtolower', array_map('trim', $rows[0])); // Normalize headers
-        // $filePairs = []; // Store (nik, vendor) pairs to check duplicates within the file
+        $rowsSheet11 = array_slice($data[11], 1);
+        $rowsSheet12 = array_slice($data[12], 1);
+    
+        $sheet11Data = [];
+        $sheet12Data = [];
+    
+        // Parsing data dari sheet 11
+        foreach ($rowsSheet11 as $row) {
+            $rowData = array_combine($headersSheet11, $row);
+            $nik = trim($rowData['nik'] ?? '');
+            if ($nik !== '') {
+                $sheet11Data[$nik] = [
+                    'jht' => $rowData['jht'] ?? 0,
+                    'jkk' => $rowData['jkk'] ?? 0,
+                    'jp'  => $rowData['jp'] ?? 0,
+                    'jkm' => $rowData['jkm'] ?? 0,
+                ];
+            }
+        }
+    
+        // Parsing data dari sheet 12
+        foreach ($rowsSheet12 as $row) {
+            $rowData = array_combine($headersSheet12, $row);
+            $nik = trim($rowData['nik'] ?? '');
+            if ($nik !== '') {
+                $sheet12Data[$nik] = [
+                    'kes' => $rowData['kes'] ?? 0,
+                ];
+            }
+        }
+    
+        // Gabungkan berdasarkan nik
+        $allNik = array_unique(array_merge(array_keys($sheet11Data), array_keys($sheet12Data)));
     
         $this->errors = [];
-        $formattedData = [];
-
-        for ($i = 1; $i < count($rows); $i++) {
-            $row = array_combine($headers, $rows[$i]);
-
-            // Standardize vendor & employee ID keys
-            $vendorName = trim($row['vendor'] ?? '');
-            $nik = trim($row['nik'] ?? '');
-
-            // **1. Validasi jika NIK kosong**
-            if (empty($nik)) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK tidak boleh kosong.";
-                continue;
-            }
-
-            // **2. Validasi duplikat (NIK, Vendor) dalam file**
-            $pairKey = $nik . '|' . $vendorName;
-            if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
-                continue;
-            }
-            $filePairs[$pairKey] = true;
-            // // **3. Cek apakah employee (NIK) ada di database**
+        $this->employees = [];
+    
+        foreach ($allNik as $nik) {
+            $jht = $sheet11Data[$nik]['jht'] ?? 0;
+            $jkk = $sheet11Data[$nik]['jkk'] ?? 0;
+            $jp  = $sheet11Data[$nik]['jp'] ?? 0;
+            $jkm = $sheet11Data[$nik]['jkm'] ?? 0;
+            $kes = $sheet12Data[$nik]['kes'] ?? 0;
+    
+            // Cek apakah NIK ada di DB
             $employee = EmployeeMaster::where('nik', $nik)->first();
             if (!$employee) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik tidak ditemukan di database.";
+                $this->errors[] = "NIK $nik tidak ditemukan di database.";
                 continue;
             }
-
-            // **4. Validasi jika jht, jp, jkm, atau kes kosong**
-            $mandatoryFields = ['jht','jkk', 'jp', 'jkm', 'kes'];
-            foreach ($mandatoryFields as $field) {
-            if (!isset($row[$field]) || trim($row[$field]) === '') {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kolom $field tidak boleh kosong.";
-            }
-        }
-
-            $formattedData[] = [
-                'nik'       => $nik,
-                'jht'       => $row['jht'] ?? null,
-                'jkk'       => $row['jkk'] ?? null,
-                'jp'        => $row['jp'] ?? null,
-                'jkm'       => $row['jkm'] ?? null,
-                'kes'       => $row['kes'] ?? null,
+    
+            $this->employees[] = [
+                'nik' => $nik,
+                'jht' => $jht ?? 0,
+                'jkk' => $jkk ?? 0,
+                'jp'  => $jp ?? 0,
+                'jkm' => $jkm ?? 0,
+                'kes' => $kes ?? 0,
             ];
         }
-    
-        $this->employees = $formattedData;
-    
         $this->stat = empty($this->errors) ? 1 : 0;
     }
+    
+
     
 
     private function convertExcelDate($value)
@@ -131,48 +137,65 @@ class BpjsImport extends Component
             $this->dispatch('alert-failure', title: 'No data to store, please check the uploaded file.');
             return;
         }
-
-        $nikMap = []; // Untuk memastikan hanya satu EmployeeMaster per NIK
-
+    
+        $hasSuccess = false;
+        $hasError = false;
+    
         foreach ($this->employees as $employeeData) {
             $nik = $employeeData['nik'];
-            $jht = $employeeData['jht'];
-            $jkk = $employeeData['jkk'];
-            $jp = $employeeData['jp'];
-            $jkm = $employeeData['jkm'];
-            $kes = $employeeData['kes'];
-
-            $employeer = EmployeeMaster::where('nik', $nik)->first();
-            $employeeId = $employeer ? $employeer->id : null;
-            
-
-            $existingAbsence = EmployBpjs::where([
-                'employee_id' => $employeer->id,
-            ])->exists();
-
-            if ($existingAbsence) {
-                $this->dispatch('alert-failure', title: "Absence data for NIK $nik and Vendor '$vendorName' in $monthYear already exists.");
+            $jht = $employeeData['jht'] ?? 0;
+            $jkk = $employeeData['jkk'] ?? 0;
+            $jp  = $employeeData['jp'] ?? 0;
+            $jkm = $employeeData['jkm'] ?? 0;
+            $kes = $employeeData['kes'] ?? 0;
+    
+            $employee = EmployeeMaster::where('nik', $nik)->first();
+    
+            if (!$employee) {
+                $this->errors[] = "NIK $nik tidak ditemukan di tabel master.";
+                $hasError = true;
                 continue;
             }
-            $data = EmployBpjs::create([
-                'employee_id' => $employeeId,
-                'jht'   => $jht,
-                'jkk'   => $jkk,
-                'jp'  => $jp,
-                'jkm'  => $jkm,
-                'kes'  => $kes,
-            ]);
-
-            if ($data) {
-                $this->dispatch('bpjs-imported');
-                $this->dispatch('close-modal', name: 'import-bpjs-modal');
-                $this->reset();
-                $this->resetValidation();
-                $this->dispatch('alert-success', title: 'BPJS Successfully Imported!');
-            } else {
-                $this->dispatch('alert-failure', title: 'Failed to Import BPJS employ');
-            }
     
+            $employeeId = $employee->id;
+            $bpjs = EmployBpjs::where('employee_id', $employeeId)->first();
+    
+            $data = $bpjs
+                ? $bpjs->update([
+                    'jht' => $jht,
+                    'jkk' => $jkk,
+                    'jp'  => $jp,
+                    'jkm' => $jkm,
+                    'kes' => $kes,
+                ])
+                : EmployBpjs::create([
+                    'employee_id' => $employeeId,
+                    'jht' => $jht,
+                    'jkk' => $jkk,
+                    'jp'  => $jp,
+                    'jkm' => $jkm,
+                    'kes' => $kes,
+                ]);
+    
+            $data ? $hasSuccess = true : $hasError = true;
+        }
+    
+        // Dispatch alert sekali di akhir proses
+        if ($hasSuccess && !$hasError) {
+            $this->dispatch('alert-success', title: 'BPJS Successfully Imported!');
+        } elseif ($hasSuccess && $hasError) {
+            $this->dispatch('alert-warning', title: 'Sebagian data berhasil diimpor, namun ada yang gagal. Cek kembali.');
+        } else {
+            $this->dispatch('alert-failure', title: 'Semua data gagal diimpor.');
+        }
+    
+        // Reset jika ada data sukses
+        if ($hasSuccess) {
+            $this->dispatch('bpjs-imported');
+            $this->dispatch('close-modal', name: 'import-bpjs-modal');
+            $this->reset();
+            $this->resetValidation();
         }
     }
+    
 }

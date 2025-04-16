@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('vendor_id')->constrained('vendors')->onDelete('cascade');
             $table->date('month_year');
             $table->string('total');
-            $table->timestamps();
         });
     }
 

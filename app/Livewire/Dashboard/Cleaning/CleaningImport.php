@@ -58,7 +58,7 @@ class CleaningImport extends Component
         }
     
         // Get the first sheet data
-        $rows = $data[0];
+        $rows = $data[8];
         // batas
     
         // Extract headers from the first row
@@ -74,12 +74,27 @@ class CleaningImport extends Component
             // Standardize vendor & employee ID keys
             $vendorName = trim($row['vendor'] ?? '');
             $nik = trim($row['nik'] ?? '');
+            $status = trim($row['status'] ?? '');
+            // dd($status);
+
+            // 1: REGULER | 2: LOADING | 3: HARIAN'
+            if($status == 'REGULER') {
+                $status = 1;
+            } elseif($status == 'LOADING') {
+                $status = 2;
+            } elseif($status == 'HARIAN') {
+                $status = 3;
+            } else {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid.";
+                continue;
+            }
 
             // **1. Validasi jika NIK kosong**
             if (empty($nik)) {
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK tidak boleh kosong.";
                 continue;
             }
+            
 
             // **2. Validasi duplikat (NIK, Vendor) dalam file**
             // $pairKey = $nik . '|' . $vendorName;
@@ -103,10 +118,11 @@ class CleaningImport extends Component
             }
 
             // **5. Cek apakah kombinasi NIK dan Vendor ada di tabel pivot**
-            $existsInPivot = DB::table('employee_master_vendor')
-                ->where('employee_master_id', $employee->id)
-                ->where('vendor_id', $vendor->id)
-                ->exists();
+              $existsInPivot = DB::table('employee_masters')
+              ->where('nik', $nik)
+              ->where('vendor_id', $vendor->id)
+              ->where('status', $employee->status)
+              ->exists();
 
             if (!$existsInPivot) {
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik tidak terdaftar pada vendor '$vendorName'.";
@@ -118,6 +134,7 @@ class CleaningImport extends Component
                 'monthYear' => $this->selectedMonthYear,
                 'vendor'    => $vendorName,
                 'nik'       => $nik,
+                'status'    => $status,
                 'total'     => $row['total'] ?? null,
             ];
         }
@@ -148,6 +165,7 @@ class CleaningImport extends Component
         foreach ($this->employees as $employeeData) {
             $nik = $employeeData['nik'];
             $vendorName = $employeeData['vendor'];
+            $status = $employeeData['status'];
             $monthYear = $employeeData['monthYear'];
             $monthYearFormat = Carbon::createFromFormat('Y-m', $monthYear)->format('Y-m-01');
             $total = $employeeData['total'] ?? 0;
@@ -161,16 +179,18 @@ class CleaningImport extends Component
             $existingAbsence = Cleaning::where([
                 'employee_id' => $employeer->id,
                 'vendor_id' => $vendor->id,
+                'status' => $status,
                 'month_year' => $monthYear,
             ])->exists();
 
             if ($existingAbsence) {
-                $this->dispatch('alert-failure', title: "Absence data for NIK $nik and Vendor '$vendorName' in $monthYear already exists.");
+                $this->dispatch('alert-failure', title: "Cleaning data for NIK $nik and Vendor '$vendorName' in $monthYear already exists.");
                 continue;
             }
             $data = Cleaning::create([
                 'employee_id' => $employeeId,
                 'vendor_id'   => $vendorId,
+                'status'      => $status,
                 'month_year'  => $monthYearFormat,
                 'total'       => $total,
             ]);
