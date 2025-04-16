@@ -96,12 +96,12 @@ class CutImport extends Component
             }
 
             // **2. Validasi duplikat (NIK, Vendor) dalam file**
-            // $pairKey = $nik . '|' . $vendorName;
-            // if (isset($filePairs[$pairKey])) {
-            //     $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
-            //     continue;
-            // }
-            // $filePairs[$pairKey] = true;
+            $pairKey = $nik . '|' . $vendorName;
+            if (isset($filePairs[$pairKey])) {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
+                continue;
+            }
+            $filePairs[$pairKey] = true;
             // // **3. Cek apakah employee (NIK) ada di database**
             $employee = EmployeeMaster::where('nik', $nik)->first();
             if (!$employee) {

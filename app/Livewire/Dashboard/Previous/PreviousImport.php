@@ -58,7 +58,7 @@ class PreviousImport extends Component
         }
     
         // Get the first sheet data
-        $rows = $data[0];
+        $rows = $data[13];
         // batas
     
         // Extract headers from the first row
@@ -74,6 +74,21 @@ class PreviousImport extends Component
             // Standardize vendor & employee ID keys
             $vendorName = trim($row['vendor'] ?? '');
             $nik = trim($row['nik'] ?? '');
+            $status = trim($row['status'] ?? '');
+            // dd($status);
+
+            // 1: REGULER | 2: LOADING | 3: HARIAN'
+            if($status == 'REGULER') {
+                $status = 1;
+            } elseif($status == 'LOADING') {
+                $status = 2;
+            } elseif($status == 'HARIAN') {
+                $status = 3;
+            } else {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid.";
+                continue;
+            }
+
 
             // **1. Validasi jika NIK kosong**
             if (empty($nik)) {
@@ -82,12 +97,12 @@ class PreviousImport extends Component
             }
 
             // **2. Validasi duplikat (NIK, Vendor) dalam file**
-            $pairKey = $nik . '|' . $vendorName;
-            if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
-                continue;
-            }
-            $filePairs[$pairKey] = true;
+            // $pairKey = $nik . '|' . $vendorName;
+            // if (isset($filePairs[$pairKey])) {
+            //     $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik sudah ada dua kali dalam file untuk vendor $vendorName.";
+            //     continue;
+            // }
+            // $filePairs[$pairKey] = true;
 
             // **3. Cek apakah employee (NIK) ada di database**
             $employee = EmployeeMaster::where('nik', $nik)->first();
@@ -104,10 +119,12 @@ class PreviousImport extends Component
             }
 
             // **5. Cek apakah kombinasi NIK dan Vendor ada di tabel pivot**
-            $existsInPivot = DB::table('employee_master_vendor')
-                ->where('employee_master_id', $employee->id)
-                ->where('vendor_id', $vendor->id)
-                ->exists();
+            $existsInPivot = DB::table('employee_masters')
+            ->where('nik', $nik)
+            ->where('vendor_id', $vendor->id)
+            ->where('status', $employee->status)
+            ->exists();
+
 
             if (!$existsInPivot) {
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik tidak terdaftar pada vendor '$vendorName'.";
@@ -118,6 +135,7 @@ class PreviousImport extends Component
             $formattedData[] = [
                 'monthYear' => $this->selectedMonthYear,
                 'vendor'    => $vendorName,
+                'status'    => $status,
                 'nik'       => $nik,
                 'total'     => $row['total'] ?? null,
             ];
@@ -144,11 +162,10 @@ class PreviousImport extends Component
             return;
         }
 
-        $nikMap = []; // Untuk memastikan hanya satu EmployeeMaster per NIK
-
         foreach ($this->employees as $employeeData) {
             $nik = $employeeData['nik'];
             $vendorName = $employeeData['vendor'];
+            $status = $employeeData['status'];
             $monthYear = $employeeData['monthYear'];
             $monthYearFormat = Carbon::createFromFormat('Y-m', $monthYear)->format('Y-m-01');
             $previous = $employeeData['total'] ?? 0;
@@ -162,6 +179,7 @@ class PreviousImport extends Component
             $existingAbsence = PreviousMonth::where([
                 'employee_id' => $employeer->id,
                 'vendor_id' => $vendor->id,
+                'status' => $status,
                 'month_year' => $monthYear,
             ])->exists();
 
@@ -172,6 +190,7 @@ class PreviousImport extends Component
             $data = PreviousMonth::create([
                 'employee_id' => $employeeId,
                 'vendor_id'   => $vendorId,
+                'status'      => $status,
                 'month_year'  => $monthYearFormat,
                 'total'       => $previous,
             ]);
