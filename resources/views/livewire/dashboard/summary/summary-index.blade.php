@@ -4,31 +4,14 @@
             <div class="w-full">
                 <div class="flex justify-between items-center space-x-4 mb-4">
                     <div>
-                        {{-- <button wire:click="$dispatch('open-modal', { name: 'create-employee-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Create employee</button> --}}
-                        {{-- <button wire:click="$dispatch('open-modal', { name: 'import-bpjs-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Import</button> --}}
-                        @php
-                        // Get the URL
-                        $url = request()->fullUrl();
-                        
-                        // Parse the URL to get the 'selectedMonthYear' parameter
-                        parse_str(parse_url($url, PHP_URL_QUERY), $params);
-                        $selectedMonthYear = $params['selectedMonthYear'] ?? '';  // Fallback in case the parameter is not set
-                        
-                        // Ensure that the selectedMonthYear is treated as a string and not a date object
-                        $url = (string) $selectedMonthYear;
-                        @endphp
-                        <button wire:click="export('{{ $url }}')" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Export</button>
+                        <button wire:click="export" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Export</button>
                     </div>
                     <div class="flex-1 flex flex-col sm:flex-row justify-end items-end space-x-0 sm:space-x-2 space-y-2 sm:space-y-0">
                         <div class="relative w-full max-w-480">
                             <div class="flex items-center space-x-2">
-                                <input disabled type="month" id="filterDate" wire:model.live.debounce="selectedMonthYear" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring focus:ring-blue-200">
-                                {{-- <button wire:click="applyFilter" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">
-                                    Terapkan Filter
-                                </button> --}}
+                                <input type="month" id="filterDate" wire:model.live.debounce.250ms="monthView" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring focus:ring-blue-200">
                             </div>
                         </div>
-                        
                     </div>
                 </div>
                 <div class="relative">
@@ -108,118 +91,163 @@
                            <tbody>
                             @if (count($summary) > 0)
                                 @foreach ($summary as $key => $value)
+                                @php
+                                    $areaTotalSalary = 0; 
+                                    $totalLembur = 0;
+                                    $totalStand = 0;
+                                    $totalMakan = 0;
+                                    $totalMel = 0;
+                                    $totalUnit = 0;
+                                    $totalLoading = 0;
+                                    $totalBonusKehadiran = 0;
+                                    $totalKebersihan = 0;
+                                    $totalSla = 0;
+                                    $totalBbm = 0;
+                                    $totalRetribusi = 0;
+                                    $totalInsentif = 0;
+                                    $totalLainnya = 0;
+                                    $totalPrevious = 0;
+                                    $totalBpjs = 0;
+
+                                        foreach ($value->employeeMaster as $employee) {
+                                            $salary = 0;
+                                            $totalSalary = 0;
+
+                                            $umk = $employee->area->umk;
+                                            $totalHarian = $employee->area->total_harian;
+
+                                            // Gaji dasar berdasarkan client
+                                            if ($employee->client == 'SECURITY' || $employee->client == 'OFFICE BOY') {
+                                                $salary = $umk;
+                                            } else {
+                                                $salary = $umk >= 4000000 ? $umk * 0.80 : $umk * 0.90;
+                                            }
+
+                                            // Jika status harian
+                                            if ($employee->status == 3) {
+                                                $absenHarian = $employee->absent
+                                                    ->where('month_year', $selectedMonthYear . '-01')
+                                                    ->where('status', $employee->status)
+                                                    ->sum('absent');
+
+                                                $salary = ($totalHarian * $absenHarian) ?? $totalHarian;
+                                            }
+
+                                            // Hitung hari kerja dan absen
+                                            $perMonth = $employee->absent
+                                                ->where('status', $employee->status)
+                                                ->first()?->total_days_in_month['total_month_employee'] ?? 0;
+
+                                            $absentEmployee = $employee->absent
+                                                ->where('month_year', $selectedMonthYear . '-01')
+                                                ->where('status', $employee->status)
+                                                ->sum('absent');
+
+                                            $totalSalary = ($perMonth > 0) ? ($salary / $perMonth) * $absentEmployee : 0;
+                                            $areaTotalSalary += $totalSalary;
+
+                                            // Tambahan lainnya
+                                            $totalLembur += $employee->lembur->sum('total');
+                                            $totalStand += $employee->stand->sum('total');
+                                            $totalMakan += $employee->makan->sum('total');
+                                            $totalMel += $employee->makan->sum('total_mel');
+                                            $totalUnit += $employee->makan->sum('total_unit');
+                                            $totalLoading += $employee->makan->sum('total_loading');
+
+                                            $bonus = $employee->absent
+                                                ->where('month_year', $selectedMonthYear . '-01')
+                                                ->where('status', $employee->status)
+                                                ->sum('incentive_amount');
+                                            $totalBonusKehadiran += $bonus;
+
+                                            foreach ($employee->clean->where('month_year', $selectedMonthYear . '-01') as $clean) {
+                                                $totalKebersihan += ($clean->total > 3)
+                                                    ? $clean->bonus_penalty
+                                                    : -$clean->bonus_penalty;
+                                            }
+                                            foreach ($employee->sla->where('month_year', $selectedMonthYear . '-01') as $sla) {
+                                                if ($sla->total >= 80) {
+                                                    $totalSla += $sla->total_sla;
+                                                } else {
+                                                    $totalSla -= $sla->total_sla;
+                                                }
+                                            }
+
+                                            if (in_array($employee->status, [2, 3])) {
+                                                    $totalBBM = 0;
+                                                } else {
+                                                    $totalBBM = $employee->bbm
+                                                        ->where('month_year', $selectedMonthYear . '-01')
+                                                        ->where('status', $employee->status)
+                                                        ->sum('total');
+                                                }
+                                            $totalBbm += $totalBBM;    
+                                            
+                                            $totalRetribusi += $employee->retribution
+                                                ->where('month_year', $selectedMonthYear . '-01')
+                                                ->where('status', $employee->status)
+                                                ->sum('total');
+
+                                            $totalInsentif += $employee->insentif->where('month_year',$selectedMonthYear . '-01')
+                                                    ->where('status', $value->status)
+                                                    ->sum('total');
+
+                                            $totalLainnya += $employee->lainya
+                                                ->where('month_year', $selectedMonthYear . '-01')
+                                                ->where('status', $employee->status)
+                                                ->sum('total');
+
+                                            $totalPrevious += $employee->previous->where('month_year',$selectedMonthYear . '-01')
+                                                    ->where('status', $employee->status)
+                                                    ->sum('total');
+                                            
+                                            $totalBpjs += $employee->bpjs->total_bpjs;
+                                        }
+                                        $totalSalary = $areaTotalSalary + $totalLembur + $totalStand + $totalMakan + $totalMel + $totalUnit + $totalLoading + $totalBonusKehadiran + $totalKebersihan + $totalSla + $totalBbm + $totalRetribusi + $totalInsentif + $totalLainnya + $totalPrevious + $totalBpjs;
+
+                                        $mgFee = $totalSalary * 0.05;
+                                        $ppn = $mgFee * 0.11;
+                                        $pph = $totalSalary * 0.2;
+                                        $totalInvoice = $totalSalary + $mgFee + $ppn + $pph;
+                                    @endphp
                                     <tr class="bg-white border-b">
                                         <td class="px-4 py-3 border-r">{{ $value->area }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($areaTotalSalary, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalLembur, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalStand, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalMakan, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalMel, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalUnit, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalLoading, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalBonusKehadiran, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalKebersihan, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalSla, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalBbm, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalRetribusi, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalInsentif, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalLainnya, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalPrevious, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($totalBpjs, 0, ',', '.') }}</td>
                                         <td class="px-4 py-3 border-r">
-                                            {{ 'Rp' . number_format($value->total_salary, 0, ',', '.') }}
+                                            {{ 'Rp' . number_format($totalSalary, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3 border-r">
-                                            {{ 'Rp' . number_format($value->total_lembur, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">
-                                            {{ 'Rp' . number_format($value->total_stand, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_makan, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_mel, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_unit, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_loading, 0, ',', '.') }}</td>
-
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_bonus_kehadiran, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_kebersihan, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_sla, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_bbm, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_retribusi, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_insentif, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_lainnya, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_previous, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($value->total_bpjs, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $totalGaji = $value->total_salary + $value->total_lembur + $value->total_stand + $value->total_makan + $value->total_bonus_kehadiran + $value->total_kebersihan + $value->total_sla + $value->total_bbm + $value->total_retribusi + $value->total_insentif + $value->total_lainnya + $value->total_previous + $value->total_bpjs;
-                                            @endphp
-                                            {{ 'Rp' . number_format($totalGaji, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $mgFee = $totalGaji * 0.05;
-                                            @endphp
                                             {{ 'Rp' . number_format($mgFee, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3 border-r">
-                                            @php
-                                                $ppn = $mgFee * 0.11;
-                                            @endphp
                                             {{ 'Rp' . number_format($ppn, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3 border-r">
-                                            @php
-                                                $pph = $totalGaji * 0.2;
-                                            @endphp
                                             {{ 'Rp' . number_format($pph, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-3 border-r">
-                                            @php
-                                                $totalInvoice = $totalGaji + $mgFee + $ppn + $pph;
-                                            @endphp
                                             {{ 'Rp' . number_format($totalInvoice, 0, ',', '.') }}
                                         </td>
                                     </tr>
                                 @endforeach
                                  {{-- Row Total Akumulasi --}}
-                                    <tr class="bg-gray-200 font-semibold">
-                                        <td class="px-4 py-3 border-r text-center">Total</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_salary'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_lembur'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_stand'), 0, ',', '.') }}</td>
-                                        
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_makan'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_mel'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_unit'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_loading'), 0, ',', '.') }}</td>
-
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_bonus_kehadiran'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_kebersihan'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_sla'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_bbm'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_retribusi'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_insentif'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_lainnya'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_previous'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($summary->sum('total_bpjs'), 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $totalGaji = $summary->sum('total_salary') + $summary->sum('total_lembur') + $summary->sum('total_stand') + $summary->sum('total_makan')
-                                                + $summary->sum('total_mel') + $summary->sum('total_unit') + $summary->sum('total_loading')
-                                                 + $summary->sum('total_bonus_kehadiran') + $summary->sum('total_kebersihan') + $summary->sum('total_sla') + $summary->sum('total_bbm') + $summary->sum('total_retribusi') + $summary->sum('total_insentif') + $summary->sum('total_lainnya') + $summary->sum('total_previous') + $summary->sum('total_bpjs');
-                                            @endphp
-                                            {{ 'Rp' . number_format($totalGaji, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $mgFee = $totalGaji * 0.05;
-                                            @endphp
-                                            {{ 'Rp' . number_format($mgFee, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $ppn = $mgFee * 0.11;
-                                            @endphp
-                                            {{ 'Rp' . number_format($ppn, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $pph = $totalGaji * 0.2;
-                                            @endphp
-                                            {{ 'Rp' . number_format($pph, 0, ',', '.') }}
-                                        </td>
-                                        <td class="px-4 py-3 border-r">
-                                            @php
-                                                $totalInvoice = $totalGaji + $mgFee + $ppn + $pph;
-                                            @endphp
-                                            {{ 'Rp' . number_format($totalInvoice, 0, ',', '.') }}
-                                        </td>
-                                    </tr>
-                                    {{-- End Row Total Akumulasi --}}
+                                 
+                                {{-- End Row Total Akumulasi --}}
                             @else
                                 <tr>
                                     <td class="px-6 py-3 border text-center whitespace-nowrap" colspan="18">No data found</td>
