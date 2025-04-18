@@ -4,7 +4,7 @@
             <div class="w-full">
                 <div class="flex justify-between items-center space-x-4 mb-4">
                     <div>
-                        {{-- <button wire:click="$dispatch('open-modal', { name: 'create-employee-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Create employee</button> --}}
+                        {{-- <button wire:click="$dispatch('open-modal', { name: 'create-value-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Create value</button> --}}
                         {{-- <button wire:click="$dispatch('open-modal', { name: 'import-bpjs-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Import</button> --}}
                         <button wire:click="export" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Export</button>
                     </div>
@@ -29,9 +29,9 @@
                         <div class="relative w-full max-w-48">
                             <select wire:model.live.debounce.250ms="status" class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="" selected>Select Status</option>
-                                <option value="REGULER">REGULER</option>
-                                <option value="LOADING">LOADING</option>
-                                <option value="HARIAN">HARIAN</option>
+                                <option value="1">REGULER</option>
+                                <option value="2">LOADING</option>
+                                <option value="3">HARIAN</option>
                             </select>
                         </div>
                         
@@ -51,7 +51,7 @@
                                 wire:model.live.debounce.250ms="search"
                                 type="text"
                                 class="ps-8 block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Search employee"
+                                placeholder="Search value"
                             />
                         </div>
                     </div>
@@ -61,7 +61,6 @@
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                                 <tr>
-                                    {{-- <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">No</th> --}}
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Vendor
                                     </th>
@@ -174,266 +173,257 @@
                             </thead>
                             <tbody>
                                 @if (count($employMaster) > 0)
-                                    @foreach ($employMaster as $key => $employee)
-                                        @foreach ($employee->vendors as $key => $value)
-                                            <tr class="bg-white border-b">
-                                                {{-- logic --}}
+                                    @foreach ($employMaster as $key => $value)
+                                        <tr class="bg-white border-b">
+                                            @php
+                                                if ($value->client == 'SECURITY' || $value->client == 'OFFICE BOY') {
+                                                    $salary = $value->area->umk;
+                                                } else {
+                                                    // Driver
+                                                    if ($value->area->umk >= 4000000) {
+                                                        $salary = $value->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
+                                                    } else {
+                                                        $salary = $value->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                                    }
+                                                }
+                                                if ($value->status == 3) {
+                                                    $calt = $value->absent->where('month_year',$selectedMonthYear . '-01')->where('status',$value->status)->sum('absent');
+                                                    // dd($calt, $$value->area->total_harian);
+                                                    $salary = ($value->area->total_harian * $calt) ?? $value->area->total_harian;
+                                                } else {
+                                                    // Driver
+                                                    if ($value->area->umk >= 4000000) {
+                                                        $salary = $value->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
+                                                    } else {
+                                                        $salary = $value->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                                    }
+                                                }
+                                            $perMonth = $value->absent->where('status', $value->status)->first()?->total_days_in_month['total_month_employee'] ?? 00;
+                                            $absentEmployee = $value->absent->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status)->sum('absent');
+                                            // dd($absentEmployee, $perMonth);
+                                            $totalSalary = ($salary/$perMonth)*$absentEmployee;
+                                            // dd($salary,$perMonth,$absentEmployee);
+                                            @endphp
+                                            <td class="px-4 py-3 border-r">{{ $value->vendors->name }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->client }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->join_date ? \Carbon\Carbon::parse( $value->join_date )->translatedFormat('M d, Y') : '-' }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->resign_date ? \Carbon\Carbon::parse( $value->resign_date )->translatedFormat('M d, Y') : '-'  }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->client }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->status_name . $value->area->area }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->nik }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->name }}</td>
+                                            <td class="px-4 py-3 border-r">{{ $value->area->area }}</td>
+                                            <td class="px-4 py-3 border-r"> 
+                                                {{ 'Rp' . number_format($totalSalary, 0, ',', '.') }}
+                                                {{-- {{$salary .'+'. $perMonth .'+'. $absentEmployee}} --}}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
                                                 @php
-                                                
-                                                if ($employee->client == 'Security' || $employee->client == 'Office Boy') {
-                                                    $salary = $employee->area->umk;
-                                                } else {
-                                                    // Driver
-                                                    if ($employee->area->umk >= 4000000) {
-                                                        $salary = $employee->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
+                                                //lembur
+                                                    $totalLembur = $value->lembur
+                                                        ->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total');
+                                                @endphp
+                                                    {{ 'Rp' . number_format($totalLembur, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r"> 
+                                                @php
+                                                $totalStand = $value->stand->where('month_year',$selectedMonthYear . '-01')
+                                                ->where('status', $value->status)
+                                                ->sum('total');
+                                                @endphp
+                                                    {{ 'Rp' . number_format($totalStand, 0, ',', '.')  }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalMakan = $value->makan->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalMakan, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalMEL = $value->makan->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total_mel');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalMEL, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalUNIT = $value->makan->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total_unit');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalUNIT, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalLOADING = $value->makan->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total_loading');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalLOADING, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r"> 
+                                                @php
+                                                $totalAbsent = $value->absent->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status)->sum('incentive_amount');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalAbsent, 0, ',', '.')  }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalClean = 0; 
+                                                foreach ($value->clean->where('month_year',$selectedMonthYear . '-01') as $clean) {
+                                                    if ($clean->total > 3) {
+                                                        $totalClean += $clean->bonus_penalty;
                                                     } else {
-                                                        $salary = $employee->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                                        $totalClean -= $clean->bonus_penalty;
                                                     }
                                                 }
-                                                if ($employee->status == 'HARIAN') {
-                                                    $calt = $employee->absent->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id)->sum('absent');
-                                                    // dd($calt, $$employee->area->total_harian);
-                                                    $salary = ($employee->area->total_harian * $calt) ?? $employee->area->total_harian;
-                                                } else {
-                                                    // Driver
-                                                    if ($employee->area->umk >= 4000000) {
-                                                        $salary = $employee->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
+                                                @endphp
+                                                
+                                                {{ 'Rp' . number_format($totalClean, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                  $totalSLA = 0;
+                                              
+                                                foreach ($value->sla->where('month_year',$selectedMonthYear . '-01') as $sla) {
+                                                    if ($sla->total  >= 80) {
+                                                        $totalSLA += $sla->total_sla;
                                                     } else {
-                                                        $salary = $employee->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                                        $totalSLA -= $sla->total_sla;
                                                     }
                                                 }
-                                                @endphp 
-                                                {{-- <td class="px-4 py-3 border text-center w-key0"><div class="py-1.5">{{ $employee + 1 }}</div></td> --}}
-                                                <td class="px-4 py-3 border-r">{{ $value->name }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->client }}</td>
+                                                @endphp
+                                                    {{ 'Rp' . number_format($totalSLA, 0, ',', '.') }}                                          
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                  if (in_array($value->status, [2, 3])) {
+                                                            $totalBBM = 0;
+                                                        } else {
+                                                            $totalBBM = $value->bbm
+                                                                ->where('month_year', $selectedMonthYear . '-01')
+                                                                ->where('status', $value->status)
+                                                                ->sum('total');
+                                                        }                                         
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalBBM, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                 if (in_array($value->status, [2, 3])) {
+                                                        $totalRetri = 0;
+                                                    } else {
+                                                        $totalRetri = $value->retribution
+                                                            ->where('status', $value->status)
+                                                            ->sum('total');
+                                                    }
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalRetri, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalInsentif = $value->insentif->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalInsentif, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalLainya = $value->lainya->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalLainya, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                $totalPrev = $value->previous->where('month_year',$selectedMonthYear . '-01')
+                                                        ->where('status', $value->status)
+                                                        ->sum('total');
+                                                @endphp
+                                                {{ 'Rp' . number_format($totalPrev, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($value->bpjs->jht ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($value->bpjs->jkk ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($value->bpjs->jkm ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($value->bpjs->jp ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($value->bpjs->kes ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format(optional($value->bpjs)->total_bpjs ?? 0, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                0
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+            
+                                                $calculate1 = $totalSalary+$totalLembur+$totalStand+$totalMakan+$totalMEL+$totalUNIT+$totalLOADING+$totalAbsent; 
+                                                $calculate2 = 0;
+                                                $calculate3 = 0;
+                                                foreach ($value->clean->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status) as $clean) {
+                                                    if ($clean->total > 3) {
+                                                        $calculate2 = $calculate1+$totalClean;
+                                                    } else {
+                                                        $calculate2 = $calculate1-$totalClean;
+                                                    }
+                                                }
+                                                if ($calculate2 == 0) {
+                                                    $calculate2 = $calculate1;
+                                                }
                                                 
-                                                <td class="px-4 py-3 border-r">{{ $employee->join_date ? \Carbon\Carbon::parse( $employee->join_date )->translatedFormat('M d, Y') : '-' }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->resign_date ? \Carbon\Carbon::parse( $employee->resign_date )->translatedFormat('M d, Y') : '-'  }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->client }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->status . $employee->area->area }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->nik }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->name }}</td>
-                                                <td class="px-4 py-3 border-r">{{ $employee->area->area }}</td>
-                                                <td class="px-4 py-3 border-r"> 
-                                                    {{ 'Rp' . number_format($salary, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    //lembur
-                                                        $totalLembur = $employee->lembur
-                                                            ->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                     {{ 'Rp' . number_format($totalLembur, 0, ',', '.') }}
-                                                </td>
-                                                
-                                                <td class="px-4 py-3 border-r"> 
-                                                    @php
-                                                    $totalStand = $employee->stand->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                        {{ 'Rp' . number_format($totalStand, 0, ',', '.')  }}
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalMakan = $employee->makan->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalMakan, 0, ',', '.') }}
-                                                </td>
+                                                foreach ($value->sla->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status) as $sla) {
+                                                    if ($sla->total  >= 80) {
+                                                        $calculate3 = $calculate2+$totalSLA;
+                                                    } else {
+                                                        $calculate3 = $calculate2-$totalSLA;
+                                                    }
+                                                }
+                                                if($calculate3 == 0){
+                                                    $calculate3 = $calculate2;
+                                                }
+                    
+                                                $calculate4 = $calculate3+$totalBBM+$totalRetri+$totalInsentif+$totalLainya+$totalPrev;
+                                                $calculated5 = $calculate4+optional($value->bpjs)->total_bpjs ?? 0;
+                                                @endphp
+                                                    {{ 'Rp' . number_format($calculated5, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                @php
+                                                    $mgFee = $calculated5 * 0.05;
+                                                    $ppn = $mgFee * 0.11;
+                                                    $pph = 0.02 * $mgFee;
+                                                    $totalInvoice = $calculated5+$mgFee+$ppn+$pph;
+                                                @endphp
+                                                {{ 'Rp' . number_format($mgFee, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($ppn, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
+                                                {{ 'Rp' . number_format($ppn, 0, ',', '.') }}
+                                            </td>
+                                            <td class="px-4 py-3 border-r">
 
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalMEL = $employee->makan->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total_mel');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalMEL, 0, ',', '.') }}
-                                                </td>
-
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalUNIT = $employee->makan->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total_unit');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalUNIT, 0, ',', '.') }}
-                                                </td>
-
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalLOADING = $employee->makan->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total_loading');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalLOADING, 0, ',', '.') }}
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r"> 
-                                                    @php
-                                                    
-                                                    $totalAbsent = $employee->absent->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id)->sum('incentive_amount');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalAbsent, 0, ',', '.')  }}
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalClean = 0; 
-                                                    foreach ($employee->clean->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $clean) {
-                                                        if ($clean->total > 3) {
-                                                            $totalClean += $clean->bonus_penalty;
-                                                        } else {
-                                                            $totalClean -= $clean->bonus_penalty;
-                                                        }
-                                                    }
-                                                    @endphp
-                                                  
-                                                    {{ 'Rp' . number_format($totalClean, 0, ',', '.') }}
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalSLA = 0;
-                                                    foreach ($employee->sla->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $sla) {
-                                                        if ($sla->total  >= 80) {
-                                                            $totalSLA += $sla->total_sla;
-                                                        } else {
-                                                            $totalSLA -= $sla->total_sla;
-                                                        }
-                                                    }
-                                                    @endphp
-                                                     {{ 'Rp' . number_format($totalSLA, 0, ',', '.') }}                                          
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalBBM = $employee->bbm->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalBBM, 0, ',', '.') }}
-                                                </td>
-                                              
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalRetri = $employee->retribution
-                                                    ->where('vendor_id', $value->id)
-                                                    ->sum('total');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalRetri, 0, ',', '.') }}
-                                                </td>
-                                              
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalInsentif = $employee->insentif->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalInsentif, 0, ',', '.') }}
-                                                    {{-- {{ 'Rp' . number_format($employee->insentif->total, 0, ',', '.') }} --}}
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalLainya = $employee->lainya->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalLainya, 0, ',', '.') }}
-                                                    {{-- {{ 'Rp' . number_format($employee->lainya->total, 0, ',', '.') }} --}}
-                                                </td>
-                                               
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                    $totalPrev = $employee->previous->where('month_year',$selectedMonthYear . '-01')
-                                                            ->where('vendor_id', $value->id)
-                                                            ->sum('total');
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($totalPrev, 0, ',', '.') }}
-                                                    {{-- {{ 'Rp' . number_format($employee->previous->total, 0, ',', '.') }} --}}
-                                                </td>
-                                                
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($employee->bpjs->jht, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($employee->bpjs->jkk, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($employee->bpjs->jkm, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($employee->bpjs->jp, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($employee->bpjs->kes, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($employee->bpjs->total_bpjs, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                  0
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                
-                                                    $calculate1 = $salary+$totalLembur+$totalStand+$totalMakan+$totalMEL+$totalUNIT+$totalLOADING+$totalAbsent; 
-                                                    $calculate2 = 0;
-                                                    $calculate3 = 0;
-                                                    foreach ($employee->clean->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $clean) {
-                                                        if ($clean->total > 3) {
-                                                            $calculate2 = $calculate1+$totalClean;
-                                                        } else {
-                                                            $calculate2 = $calculate1-$totalClean;
-                                                        }
-                                                    }
-                                                    if ($calculate2 == 0) {
-                                                        $calculate2 = $calculate1;
-                                                    }
-                                                   
-                                                    foreach ($employee->sla->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $sla) {
-                                                        if ($sla->total  >= 80) {
-                                                            $calculate3 = $calculate2+$totalSLA;
-                                                        } else {
-                                                            $calculate3 = $calculate2-$totalSLA;
-                                                        }
-                                                    }
-                                                    if($calculate3 == 0){
-                                                        $calculate3 = $calculate2;
-                                                    }
-                     
-                                                    $calculate4 = $calculate3+$totalBBM+$totalRetri+$totalInsentif+$totalLainya+$totalPrev;
-                                                    $calculated5 = $calculate4+$employee->bpjs->total_bpjs;
-                                                    @endphp
-                                                        {{ 'Rp' . number_format($calculated5, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    @php
-                                                       $mgFee = $calculated5 * 0.05;
-                                                       $ppn = $mgFee * 0.11;
-                                                       $pph = 0.02 * $mgFee;
-                                                       $totalInvoice = $calculated5+$mgFee+$ppn+$pph;
-                                                    @endphp
-                                                    {{ 'Rp' . number_format($mgFee, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($ppn, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-                                                    {{ 'Rp' . number_format($ppn, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3 border-r">
-
-                                                    {{ 'Rp' . number_format($totalInvoice, 0, ',', '.') }}
-                                                   
-                                                </td>
-                                            </tr>
-                                        @endforeach
+                                                {{ 'Rp' . number_format($totalInvoice, 0, ',', '.') }}
+                                            </td>
+                                        </tr>
                                     @endforeach
                                 @else
                                     <tr class="bg-white border-b">

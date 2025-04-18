@@ -20,6 +20,8 @@ class EmployBpjs extends Model
         'jkm',
         'jp',
         'kes',
+        'vendor_id',
+        'status',
     ];
 
     public function employeeMaster()
@@ -29,9 +31,12 @@ class EmployBpjs extends Model
 
     public function getTotalBpjsAttribute()
     {
+        if (!$this->employee_id) {
+            return 0;
+            // dd('dsa');
+        }
         return $this->where('employee_id', $this->employee_id)
             ->sum(\DB::raw('jht + jkk + jkm + jp + kes'));
     }
-
 
 }

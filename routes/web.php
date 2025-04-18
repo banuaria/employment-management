@@ -81,11 +81,11 @@ Route::group(['prefix' => 'cms', 'middleware' => ['auth']], function(){
 
         Route::name('cms.product.')->group(function () {
             Route::get('/products', ProductIndex::class)->name('index');
-            Route::get('/product-create', ProductCreate::class)->name('create');
-            Route::get('/product-edit/{id}', ProductEdit::class)->name('edit');
-            Route::get('/product-categories', ProductCategoryIndex::class)->name('categories');
-            Route::get('/product-subcategories', ProductSubcategoryIndex::class)->name('subcategories');
-            Route::get('/product-tags', ProductTagIndex::class)->name('tags');
+            // Route::get('/product-create', ProductCreate::class)->name('create');
+            // Route::get('/product-edit/{id}', ProductEdit::class)->name('edit');
+            // Route::get('/product-categories', ProductCategoryIndex::class)->name('categories');
+            // Route::get('/product-subcategories', ProductSubcategoryIndex::class)->name('subcategories');
+            // Route::get('/product-tags', ProductTagIndex::class)->name('tags');
         });
 
         Route::get('/stores', StoreIndex::class)->name('cms.stores');

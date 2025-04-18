@@ -61,6 +61,12 @@
                                         NIK
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Vendor
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Status
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Name
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
@@ -87,6 +93,8 @@
                                     <tr class="bg-white border-b">
                                         <td class="px-4 py-3 border text-center w-0"><div class="py-1.5">{{ $bpjs->firstItem() + $key }}</div></td>
                                         <td class="px-4 py-3 border-r">{{ $value->employeeMaster->nik }}</td>
+                                        <td class="px-4 py-3 border-r">{{ $value->employeeMaster->vendors->name }}</td>
+                                        <td class="px-4 py-3 border-r">{{ $value->employeeMaster->status_name }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->employeeMaster->name }}</td>
                                         <td class="px-4 py-3 border-r">{{ 'Rp ' . number_format($value->jht, 0, ',', '.') }}</td>
                                         <td class="px-4 py-3 border-r">{{ 'Rp ' . number_format($value->jkk, 0, ',', '.') }}</td>

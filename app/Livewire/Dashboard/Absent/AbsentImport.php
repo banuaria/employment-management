@@ -159,7 +159,6 @@ class AbsentImport extends Component
             return;
         }
 
-        $nikMap = []; // Untuk memastikan hanya satu EmployeeMaster per NIK
 
         foreach ($this->employees as $employeeData) {
             $nik = $employeeData['nik'];
@@ -173,7 +172,7 @@ class AbsentImport extends Component
 
             $vendor = Vendor::where('name', $vendorName)->first();
             $vendorId = $vendor ? $vendor->id : null;
-            $employeer = EmployeeMaster::where('nik', $nik)->first();
+            $employeer = EmployeeMaster::where('nik', $nik)->where('status', $status)->where('vendor_id', $vendorId)->first();
             $employeeId = $employeer ? $employeer->id : null;
 
             $existingAbsence = AbsentMonthlies::where([
@@ -187,6 +186,7 @@ class AbsentImport extends Component
                 $this->dispatch('alert-failure', title: "Absence data for NIK $nik and Vendor '$vendorName' in $monthYear already exists.");
                 continue;
             }
+
             $data = AbsentMonthlies::create([
                 'employee_id' => $employeeId,
                 'vendor_id'   => $vendorId,

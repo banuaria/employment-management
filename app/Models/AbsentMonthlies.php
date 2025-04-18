@@ -76,7 +76,7 @@ class AbsentMonthlies extends Model
         $totalDaysData = $this->getTotalDaysInMonthAttribute();
         $totalMonthEmployee = $totalDaysData['total_month_employee'] ?? 0; // Ambil total bulan karyawan
 
-        $absentDays = $this->absent ?? 0; // Jumlah hari absen
+        $absentDays = $this->bonus_absent ?? 0; // Jumlah hari absen
 
         // Debugging (hapus setelah dicek)
         
@@ -139,13 +139,20 @@ class AbsentMonthlies extends Model
             $response = Http::get("https://api-harilibur.vercel.app/api?year=$year");
 
             if ($response->successful()) {
-                $holidays = collect($response->json())->pluck('holiday_date')->toArray();
-                // Cache the holiday data for 1 year
+                $holidays = collect($response->json())
+                    ->filter(function ($item) {
+                        return isset($item['is_national_holiday']) && $item['is_national_holiday'] === true;
+                    })
+                    ->pluck('holiday_date')
+                    ->toArray();
+    
+                // Cache untuk 1 tahun
                 Cache::put("holidays_$year", $holidays, now()->addYear());
             } else {
                 $holidays = [];
             }
         }
+        // dd($holidays);
 
         // Check if the date is in the list of holidays
         return in_array($date->format('Y-m-d'), $holidays);

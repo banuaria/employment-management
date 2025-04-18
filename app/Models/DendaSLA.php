@@ -46,7 +46,10 @@ class DendaSLA extends Model
     {
         // dd('dsa');
         $umk = $this->employeeMaster->area->umk ?? 0;
-        $gapok = ($umk > 4000000) ? 80 : 90; // Tentukan kategori 80% atau 90%
+        if (in_array($this->employeeMaster->status, [2, 3])) {
+            return 0;
+        }
+        $gapok = ($umk >= 4000000) ? 80 : 90; // Tentukan kategori 80% atau 90%
         $percentage = $this->total; // Ambil SLA performance dari database
 
         // Mapping kompensasi berdasarkan kategori gaji pokok

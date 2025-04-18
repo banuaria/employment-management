@@ -62,7 +62,7 @@ class Cleaning extends Model
         }
 
         $total = $this->total; // Ambil jumlah cuci dari database
-        $is80 = ($employee->area->umk > 4000000); // UMK > 4jt = 80%, selain itu 90%
+        $is80 = ($employee->area->umk >= 4000000); // UMK > 4jt = 80%, selain itu 90%
 
         // Bonus (jika total cuci = 4)
         if ($total == 4) {

@@ -86,7 +86,7 @@ class HomeIndex extends Component
                 }
             });
         })
-       ->paginate(60);
+       ->paginate(15);
         $data = [
             'employMaster' => $employMaster,
             'vendors' => Vendor::pluck('name', 'id'),

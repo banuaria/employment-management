@@ -178,7 +178,7 @@ class MakanImport extends Component
 
             $vendor = Vendor::where('name', $vendorName)->first();
             $vendorId = $vendor ? $vendor->id : null;
-            $employeer = EmployeeMaster::where('nik', $nik)->first();
+            $employeer = EmployeeMaster::where('nik', $nik)->where('status', $status)->where('vendor_id', $vendorId)->first();
             $employeeId = $employeer ? $employeer->id : null;
 
             $existingAbsence = Makan::where([

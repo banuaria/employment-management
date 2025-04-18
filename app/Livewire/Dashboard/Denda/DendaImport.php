@@ -127,6 +127,20 @@ class DendaImport extends Component
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": Employee dengan NIK $nik tidak terdaftar pada vendor '$vendorName'.";
                 continue;
             }
+            
+            $rawTotal = $row['total'];
+            $formatted = str_replace(',', '.', $rawTotal);
+            $decimalPart = explode('.', $formatted)[1] ?? '';
+
+            if (
+                strlen($decimalPart) === 2 ||
+                ((int) ($decimalPart[2] ?? 0) > 0) ||
+                ((int) ($decimalPart[3] ?? 0) > 0)
+            ) {
+                $total = ceil((float) $formatted);
+            } else {
+                $total = floor((float) $formatted);
+            }
 
             // **6. Simpan data valid ke array**
             $formattedData[] = [
@@ -134,7 +148,7 @@ class DendaImport extends Component
                 'vendor'    => $vendorName,
                 'nik'       => $nik,
                 'status'    => $status,
-                'total'     => $row['total'] ?? null,
+                'total'     => $total ?? 0,
             ];
         }
     
@@ -172,7 +186,7 @@ class DendaImport extends Component
 
             $vendor = Vendor::where('name', $vendorName)->first();
             $vendorId = $vendor ? $vendor->id : null;
-            $employeer = EmployeeMaster::where('nik', $nik)->first();
+            $employeer = EmployeeMaster::where('nik', $nik)->where('status', $status)->where('vendor_id', $vendorId)->first();
             $employeeId = $employeer ? $employeer->id : null;
 
             $existingAbsence = DendaSLA::where([

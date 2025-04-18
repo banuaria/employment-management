@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('jkm');
             $table->string('jp');
             $table->string('kes');
-            $table->timestamps();
         });
     }
 

@@ -129,13 +129,26 @@ class StandImport extends Component
                 continue;
             }
 
+            $rawTotal = $row['total'];
+            // Ganti koma (,) dengan titik (.) agar bisa diproses sebagai float
+            $formatted = str_replace(',', '.', $rawTotal);
+
+            // Cek jumlah digit setelah titik
+            $decimalPart = explode('.', $formatted)[1] ?? null;
+
+            if ($decimalPart && strlen($decimalPart) == 2) {
+                $total = ceil((float) $formatted);
+            } else {
+                $total = floor((float) $formatted);
+            }
+
             // **6. Simpan data valid ke array**
             $formattedData[] = [
                 'monthYear' => $this->selectedMonthYear,
                 'vendor'    => $vendorName,
                 'nik'       => $nik,
                 'status'    => $status,
-                'total'     => $row['total'] ?? null,
+                'total'     => $total ?? 0,
             ];
         }
     
@@ -173,7 +186,7 @@ class StandImport extends Component
 
             $vendor = Vendor::where('name', $vendorName)->first();
             $vendorId = $vendor ? $vendor->id : null;
-            $employeer = EmployeeMaster::where('nik', $nik)->first();
+            $employeer = EmployeeMaster::where('nik', $nik)->where('status', $status)->where('vendor_id', $vendorId)->first();
             $employeeId = $employeer ? $employeer->id : null;
 
             $existingAbsence = Stand::where([

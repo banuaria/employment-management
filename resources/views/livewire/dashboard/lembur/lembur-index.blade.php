@@ -70,6 +70,9 @@
                                         Vendor
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Status
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Total Amount
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">Action</th>
@@ -83,6 +86,9 @@
                                         <td class="px-4 py-3 border-r">{{ $value->month_year ? \Carbon\Carbon::parse( $value->month_year )->translatedFormat('M, Y') : '-'}}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->employeeMaster->nik }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->employeeMaster->name }}</td>
+                                        <td class="px-4 py-3 border-r">
+                                            {{ $value->status_name }}
+                                        </td>
                                         <td class="px-4 py-3 border-r">
                                             {{ $value->vendors->name }}
                                         </td>

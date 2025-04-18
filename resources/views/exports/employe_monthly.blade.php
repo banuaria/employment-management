@@ -133,69 +133,73 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($employees as $employee)
-                @foreach ($employee->vendors as $key => $value)
+            @foreach($employees as $key => $value)
                     @php
-                        if ($employee->client == 'Security' || $employee->client == 'Office Boy') {
-                        $salary = $employee->area->umk;
+                        if ($value->client == 'Security' || $value->client == 'Office Boy') {
+                        $salary = $value->area->umk;
                         } else {
                             // Driver
-                            if ($employee->area->umk >= 4000000) {
-                                $salary = $employee->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
+                            if ($value->area->umk >= 4000000) {
+                                $salary = $value->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
                             } else {
-                                $salary = $employee->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                $salary = $value->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
                             }
                         }
-                        if ($employee->status == 'HARIAN') {
-                            $calt = $employee->absent->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id)->sum('absent');
-                            $salary = ($employee->area->total_harian * $calt) ?? $employee->area->total_harian;
+                        if ($value->status == 3) {
+                            $calt = $value->absent->where('month_year',$selectedMonthYear . '-01')->where('status',$value->status)->sum('absent');
+                            // dd($calt, $$value->area->total_harian);
+                            $salary = ($value->area->total_harian * $calt) ?? $value->area->total_harian;
                         } else {
                             // Driver
-                            if ($employee->area->umk >= 4000000) {
-                                $salary = $employee->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
+                            if ($value->area->umk >= 4000000) {
+                                $salary = $value->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
                             } else {
-                                $salary = $employee->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                $salary = $value->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
                             }
                         }
+                        $perMonth = $value->absent->where('status', $value->status)->first()?->total_days_in_month['total_month_employee'] ?? 00;
+                        $absentEmployee = $value->absent->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status)->sum('absent');
+                        // dd($absentEmployee, $perMonth);
+                        $totalSalary = ($salary/$perMonth)*$absentEmployee;
 
-                        $totalLembur = $employee->lembur
+                        $totalLembur = $value->lembur
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('total');
 
-                        $totalStand = $employee->stand
+                        $totalStand = $value->stand
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('total');
 
-                        $totalMakan = $employee->makan
+                        $totalMakan = $value->makan
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('total');
 
-                        $totalMEL = $employee->makan
+                        $totalMEL = $value->makan
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('total_mel');
 
-                        $totalUNIT = $employee->makan
+                        $totalUNIT = $value->makan
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('total_unit');
 
-                        $totalLOADING = $employee->makan
+                        $totalLOADING = $value->makan
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('total_loading');
 
-                        $totalAbsent = $employee->absent
+                        $totalAbsent = $value->absent
                         ->where('month_year',$selectedMonthYear . '-01')
-                        ->where('vendor_id', $value->id)
+                        ->where('status', $value->status)
                         ->sum('incentive_amount');
 
                               
-                $employeeClean = $employee->clean->where('month_year', $selectedMonthYear . '-01')->where('vendor_id', $value->id);
-                $employeeSLA = $employee->sla->where('month_year', $selectedMonthYear . '-01')->where('vendor_id', $value->id);
+                $employeeClean = $value->clean->where('month_year', $selectedMonthYear . '-01')->where('status', $value->status);
+                $employeeSLA = $value->sla->where('month_year', $selectedMonthYear . '-01')->where('status', $value->status);
 
                 $totalClean = 0; 
                 foreach ($employeeClean as $clean) {
@@ -215,29 +219,35 @@
                     }
                 }
 
-                $totalBBM = $employee->bbm
+                if (in_array($value->status, [2, 3])) {
+                    $totalBBM = 0;
+                } else {
+                    $totalBBM = $value->bbm
+                        ->where('month_year', $selectedMonthYear . '-01')
+                        ->where('status', $value->status)
+                        ->sum('total');
+                }             
+                if (in_array($value->status, [2, 3])) {
+                    $totalRetri = 0;
+                } else {
+                    $totalRetri = $value->retribution
+                        ->where('status', $value->status)
+                        ->sum('total');
+                }
+
+                $totalInsentif = $value->insentif
                 ->where('month_year',$selectedMonthYear . '-01')
-                ->where('vendor_id', $value->id)
+                ->where('status', $value->status)
                 ->sum('total');
 
-                $totalRetri = $employee->retribution
+                $totalLainya = $value->lainya
                 ->where('month_year',$selectedMonthYear . '-01')
-                ->where('vendor_id', $value->id)
+                ->where('status', $value->status)
                 ->sum('total');
 
-                $totalInsentif = $employee->insentif
+                $totalPrev = $value->previous
                 ->where('month_year',$selectedMonthYear . '-01')
-                ->where('vendor_id', $value->id)
-                ->sum('total');
-
-                $totalLainya = $employee->lainya
-                ->where('month_year',$selectedMonthYear . '-01')
-                ->where('vendor_id', $value->id)
-                ->sum('total');
-
-                $totalPrev = $employee->previous
-                ->where('month_year',$selectedMonthYear . '-01')
-                ->where('vendor_id', $value->id)
+                ->where('status', $value->status)
                 ->sum('total');
 
                 $calculate1 = $salary+$totalLembur+$totalStand+$totalMakan+$totalMEL+$totalUNIT+$totalLOADING+$totalAbsent; 
@@ -265,29 +275,18 @@
                         $calculate3 = $calculate2-$totalSLA;
                     }
                 }
-                // if($calculate3 == 0){
-                //     $calculate3 = $calculate2;
-                // }
-
-                // $calculate4 = $calculate3+$totalBBM+$totalRetri+$totalInsentif+$totalLainya+$totalPrev;
-                // $calculate5 = $calculate4+$employee->bpjs->total_bpjs;
-
-                // $mgFee = $calculate5 * 0.05;
-                // $ppn = $mgFee * 0.11;
-                // $pph = 0.02 * $mgFee;
-                // $totalInvoice = $calculate5 + $mgFee + $ppn + $pph;
                 @endphp
                 <tr>
                     <td>{{ $value->name }}</td>
-                    <td>{{ $employee->client }}</td>
-                    <td>{{ $employee->join_date ? \Carbon\Carbon::parse($employee->join_date)->format('M d, Y') : '-' }}</td>
-                    <td>{{ $employee->resign_date ? \Carbon\Carbon::parse($employee->resign_date)->format('M d, Y') : '-' }}</td>
-                    <td>{{ $employee->client }}</td>
-                    <td>{{ $employee->status . $employee->area->area }}</td>
-                    <td>{{ $employee->nik }}</td>
-                    <td>{{ $employee->name }}</td>
-                    <td>{{ $employee->area->area }}</td>
-                    <td>{{ $salary }}</td>
+                    <td>{{ $value->client }}</td>
+                    <td>{{ $value->join_date ? \Carbon\Carbon::parse($value->join_date)->format('M d, Y') : '-' }}</td>
+                    <td>{{ $value->resign_date ? \Carbon\Carbon::parse($value->resign_date)->format('M d, Y') : '-' }}</td>
+                    <td>{{ $value->client }}</td>
+                    <td>{{ $value->status_name . $value->area->area }}</td>
+                    <td>{{ $value->nik }}</td>
+                    <td>{{ $value->name }}</td>
+                    <td>{{ $value->area->area }}</td>
+                    <td>{{ $totalSalary }}</td>
                     <td> {{ $totalLembur }}</td>
                     <td> {{ $totalStand  }}</td>
                     <td>   {{ $totalMakan }} </td>
@@ -298,7 +297,7 @@
                     <td> 
                         @php
                         $totalClean = 0; 
-                        foreach ($employee->clean->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $clean) {
+                        foreach ($value->clean->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status) as $clean) {
                             if ($clean->total > 3) {
                                 $totalClean += $clean->bonus_penalty;
                             } else {
@@ -311,7 +310,7 @@
                     <td> 
                         @php
                         $totalSLA = 0;
-                        foreach ($employee->sla->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $sla) {
+                        foreach ($value->sla->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status) as $sla) {
                             if ($sla->total  >= 80) {
                                 $totalSLA += $sla->total_sla;
                             } else {
@@ -328,32 +327,32 @@
                     <td> {{ $totalPrev }}</td>
 
                     <td>
-                        {{ $employee->bpjs->jht }}
+                        {{ $value->bpjs->jht ?? 0 }}
                     </td>
                     <td>
-                        {{ $employee->bpjs->jkk }}
+                        {{ $value->bpjs->jkk ?? 0 }}
                     </td>
                     <td>
-                        {{ $employee->bpjs->jkm }}
+                        {{ $value->bpjs->jkm ?? 0 }}
                     </td>
                     <td>
-                        {{ $employee->bpjs->jp }}
+                        {{ $value->bpjs->jp ?? 0 }}
                     </td>
                     <td>
-                        {{ $employee->bpjs->kes }}
+                        {{ $value->bpjs->kes ?? 0 }}
                     </td>
                     <td>
-                        {{ $employee->bpjs->total_bpjs }}
+                        {{ optional($value->bpjs)->total_bpjs ?? 0 }}
                     </td>
                     <td>
                       0
                     </td>
                     <td>
                         @php
-                        $calculate1 = $salary+$totalLembur+$totalStand+$totalMakan+$totalMEL+$totalUNIT+$totalLOADING+$totalAbsent; 
+                        $calculate1 = $totalSalary+$totalLembur+$totalStand+$totalMakan+$totalMEL+$totalUNIT+$totalLOADING+$totalAbsent; 
                         $calculate2 = 0;
                         $calculate3 = 0;
-                        foreach ($employee->clean->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $clean) {
+                        foreach ($value->clean->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status) as $clean) {
                             if ($clean->total > 3) {
                                 $calculate2 = $calculate1+$totalClean;
                             } else {
@@ -364,7 +363,7 @@
                             $calculate2 = $calculate1;
                         }
                         
-                        foreach ($employee->sla->where('month_year',$selectedMonthYear . '-01')->where('vendor_id', $value->id) as $sla) {
+                        foreach ($value->sla->where('month_year',$selectedMonthYear . '-01')->where('status', $value->status) as $sla) {
                             if ($sla->total  >= 80) {
                                 $calculate3 = $calculate2+$totalSLA;
                             } else {
@@ -376,7 +375,7 @@
                         }
 
                         $calculate4 = $calculate3+$totalBBM+$totalRetri+$totalInsentif+$totalLainya+$totalPrev;
-                        $calculated5 = $calculate4+$employee->bpjs->total_bpjs;
+                        $calculated5 = $calculate4+optional($value->bpjs)->total_bpjs ?? 0;
                         @endphp
                             {{ $calculated5 }}
                     </td>
@@ -400,7 +399,6 @@
 
                     </td>
                 </tr>
-                @endforeach
             @endforeach
         </tbody>
     </table>
