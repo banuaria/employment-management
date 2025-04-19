@@ -89,6 +89,30 @@
                                 </tr>
                             </thead>
                            <tbody>
+                            @php
+                                // Inisialisasi variabel total akumulasi di luar loop
+                                $grandAreaTotalSalary = 0;
+                                $grandTotalLembur = 0;
+                                $grandTotalStand = 0;
+                                $grandTotalMakan = 0;
+                                $grandTotalMel = 0;
+                                $grandTotalUnit = 0;
+                                $grandTotalLoading = 0;
+                                $grandTotalBonusKehadiran = 0;
+                                $grandTotalKebersihan = 0;
+                                $grandTotalSla = 0;
+                                $grandTotalBbm = 0;
+                                $grandTotalRetribusi = 0;
+                                $grandTotalInsentif = 0;
+                                $grandTotalLainnya = 0;
+                                $grandTotalPrevious = 0;
+                                $grandTotalBpjs = 0;
+                                $grandTotalSalary = 0;
+                                $grandMgFee = 0;
+                                $grandPpn = 0;
+                                $grandPph = 0;
+                                $grandTotalInvoice = 0;
+                            @endphp
                             @if (count($summary) > 0)
                                 @foreach ($summary as $key => $value)
                                 @php
@@ -209,6 +233,28 @@
                                         $ppn = $mgFee * 0.11;
                                         $pph = $totalSalary * 0.2;
                                         $totalInvoice = $totalSalary + $mgFee + $ppn + $pph;
+                                        $grandAreaTotalSalary += $areaTotalSalary;
+
+                                        $grandTotalLembur += $totalLembur;
+                                        $grandTotalStand += $totalStand;
+                                        $grandTotalMakan += $totalMakan;
+                                        $grandTotalMel += $totalMel;
+                                        $grandTotalUnit += $totalUnit;
+                                        $grandTotalLoading += $totalLoading;
+                                        $grandTotalBonusKehadiran += $totalBonusKehadiran;
+                                        $grandTotalKebersihan += $totalKebersihan;
+                                        $grandTotalSla += $totalSla;
+                                        $grandTotalBbm += $totalBbm;
+                                        $grandTotalRetribusi += $totalRetribusi;
+                                        $grandTotalInsentif += $totalInsentif;
+                                        $grandTotalLainnya += $totalLainnya;
+                                        $grandTotalPrevious += $totalPrevious;
+                                        $grandTotalBpjs += $totalBpjs;
+                                        $grandTotalSalary += $totalSalary;
+                                        $grandMgFee += $mgFee;
+                                        $grandPpn += $ppn;
+                                        $grandPph += $pph;
+                                        $grandTotalInvoice += $totalInvoice;
                                     @endphp
                                     <tr class="bg-white border-b">
                                         <td class="px-4 py-3 border-r">{{ $value->area }}</td>
@@ -246,7 +292,30 @@
                                     </tr>
                                 @endforeach
                                  {{-- Row Total Akumulasi --}}
-                                 
+                                 <tr class="bg-gray-200 font-bold">
+                                    <td class="px-4 py-3 border-r text-center">Total</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandAreaTotalSalary, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalLembur, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalStand, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalMakan, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalMel, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalUnit, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalLoading, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalBonusKehadiran, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalKebersihan, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalSla, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalBbm, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalRetribusi, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalInsentif, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalLainnya, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalPrevious, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalBpjs, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalSalary, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandMgFee, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandPpn, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandPph, 0, ',', '.') }}</td>
+                                    <td class="px-4 py-3 border-r">{{ 'Rp' . number_format($grandTotalInvoice, 0, ',', '.') }}</td>
+                                </tr>
                                 {{-- End Row Total Akumulasi --}}
                             @else
                                 <tr>
