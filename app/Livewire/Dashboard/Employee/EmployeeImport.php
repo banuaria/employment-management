@@ -70,6 +70,7 @@ class EmployeeImport extends Component
     
             // Standardize vendor & employee ID keys
             $vendorName = trim($row['vendorname'] ?? '');
+            $nameEmp = trim($row['nameEmp'] ?? '');
             // dd($vendorName);
             $vendorId = Vendor::where('name', $vendorName)->first()->id ?? null;
 
@@ -97,7 +98,7 @@ class EmployeeImport extends Component
 
             // **2. Validasi panjang NIK (harus 16 digit angka)**
             if (!preg_match('/^\d{16}$/', $nik)) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK harus terdiri dari 16 digit angka.";
+                $this->errors[] = "Error pada baris " . ($i + 1) .  ": dengan nama . $nameEmp . NIK harus terdiri dari 16 digit angka.";
                 continue;
             }
 

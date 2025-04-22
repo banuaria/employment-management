@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard\Cleaning;
 
 use App\Models\Cleaning;
 use App\Models\Vendor;
+use Carbon\Carbon;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -21,7 +22,6 @@ class CleaningIndex extends Component
     public string $sort_direction = 'asc';
     public $search = '';
     public $selectedVendor = '';
-
 
     public function updatingSearch()
     {
@@ -43,7 +43,7 @@ class CleaningIndex extends Component
             $query->whereHas('vendors', fn ($q) => $q->where('vendor_id', $this->selectedVendor))
         )
         ->when($this->search !== '', fn (Builder $query) => // Renamed here
-        $query->whereHas('employeeMaster', fn ($q) => $q->where('name', 'like', '%'. $this->search .'%'))
+            $query->whereHas('employeeMaster', fn ($q) => $q->where('name', 'like', '%'. $this->search .'%'))
         )
         ->paginate(10);
         $data = [

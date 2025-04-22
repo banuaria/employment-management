@@ -9,6 +9,11 @@
                         {{-- <button wire:click="export" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Export</button> --}}
                     </div>
                     <div class="flex-1 flex flex-col sm:flex-row justify-end items-end space-x-0 sm:space-x-2 space-y-2 sm:space-y-0">
+                        <div class="relative w-full max-w-480">
+                            <div class="flex items-center space-x-2">
+                                <input type="month" id="filterDate" wire:model.live.debounce.250ms="monthView" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring focus:ring-blue-200">
+                            </div>
+                        </div>
                         {{-- <div class="relative w-full max-w-48">
                             <select wire:model.live.debounce.250ms="client" class="block w-full p-2 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-indigo-500 focus:border-indigo-500">
                                 <option value="" selected>Select Client</option>
@@ -73,13 +78,19 @@
                                         Status
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Total Amount
+                                        Total Count
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Total Result
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @if (count($cleaning) > 0)
+                                @php
+                                    $totalClean = 0;  // Initialize $totalClean before the loop starts
+                                @endphp
                                     @foreach ($cleaning as $key => $value)
                                     <tr class="bg-white border-b">
                                         <td class="px-4 py-3 border text-center w-0"><div class="py-1.5">{{ $cleaning->firstItem() + $key }}</div></td>
@@ -93,6 +104,16 @@
                                             {{ $value->status_name }}
                                         </td>
                                         <td class="px-4 py-3 border-r">{{ number_format($value->total, 0, ',', '.')}}
+                                        </td>
+                                        <td class="px-4 py-3 border-r">
+                                            @php
+                                            if ($value->total > 3) {
+                                                $totalClean = $value->bonus_penalty;
+                                            } else {
+                                                $totalClean = '-'. $value->bonus_penalty;
+                                            }
+                                        @endphp
+                                        {{ number_format($totalClean, 0, ',', '.') }}
                                         </td>
                                         <td class="px-4 py-2 border-r w-0">
                                             <div class="flex justify-center items-center space-x-2">
