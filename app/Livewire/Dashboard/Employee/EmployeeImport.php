@@ -70,14 +70,15 @@ class EmployeeImport extends Component
     
             // Standardize vendor & employee ID keys
             $vendorName = trim($row['vendorname'] ?? '');
-            $nameEmp = trim($row['nameEmp'] ?? '');
+            $nameEmp = trim($row['name'] ?? '');
+
             // dd($vendorName);
             $vendorId = Vendor::where('name', $vendorName)->first()->id ?? null;
 
             $nik = trim($row['nik'] ?? '');
             $status = trim($row['status'] ?? '');
 
-            // 1: REGULER | 2: LOADING | 3: HARIAN'
+          // 1: REGULER | 2: LOADING | 3: HARIAN
             if($status == 'REGULER') {
                 $status = 1;
             } elseif($status == 'LOADING') {
@@ -85,42 +86,41 @@ class EmployeeImport extends Component
             } elseif($status == 'HARIAN') {
                 $status = 3;
             } else {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Status tidak valid untuk karyawan '$nameEmp'.";
                 continue;
             }
-    
-            // Check for duplicate (nik, vendorname) pairs **inside the file itself**
-            // **1. Validasi jika NIK kosong**
+
+            // 1. Validasi jika NIK kosong
             if (empty($nik)) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK tidak boleh kosong.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK tidak boleh kosong untuk karyawan '$nameEmp'.";
                 continue;
             }
 
-            // **2. Validasi panjang NIK (harus 16 digit angka)**
+            // 2. Validasi panjang NIK (harus 16 digit angka)
             if (!preg_match('/^\d{16}$/', $nik)) {
-                $this->errors[] = "Error pada baris " . ($i + 1) .  ": dengan nama . $nameEmp . NIK harus terdiri dari 16 digit angka.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": NIK harus terdiri dari 16 digit angka untuk karyawan '$nameEmp'.";
                 continue;
             }
 
-            // **3. Validasi duplikat (NIK, Vendor) dalam file**
+            // 3. Validasi duplikat (NIK, Vendor, Status) dalam file
             $pairKey = $nik . '|' . $vendorName . '|' . $status;
             if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file (karyawan '$nameEmp').";
                 continue;
             }
 
-           // **4. Validasi jika joindate kosong**
+            // 4. Validasi jika joindate kosong
             if (empty($row['joindate'])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Tanggal bergabung (joindate) tidak boleh kosong.";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Tanggal bergabung (joindate) tidak boleh kosong untuk karyawan '$nameEmp'.";
                 continue;
             }
 
-              // Check if vendor exists
+            // Check if vendor exists
             $vendor = Vendor::where('name', $vendorName)->first();
-              if (!$vendor) {
-                  $this->errors[] = "Error pada baris " . ($i + 1) . ": Vendor '$vendorName' tidak ditemukan di database.";
-                  continue;
-              }
+            if (!$vendor) {
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Vendor '$vendorName' tidak ditemukan di database (karyawan '$nameEmp').";
+                continue;
+            }
 
             $filePairs[$pairKey] = true;
             // Check if employee exists in EmployeeMaster
