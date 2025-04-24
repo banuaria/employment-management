@@ -75,7 +75,9 @@
                                         <td class="px-4 py-3 border-r">{{ $value->area }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->name }}</td>
                                         <td class="px-4 py-3 border-r">{{ 'Rp ' . number_format($value->umk, 0, ',', '.') }}</td>
-                                        <td class="px-4 py-3 border-r">{{ 'Rp ' . number_format($value->total_harian, 0, ',', '.') }}</td>
+                                        <td class="px-4 py-3 border-r">
+                                            {{ 'Rp ' . number_format($value->total_harian !== '' ? (float) $value->total_harian : 0, 0, ',', '.') }}
+                                        </td>
                                         <td class="px-4 py-2 border-r w-0">
                                             <div class="flex justify-center items-center space-x-2">
                                                
