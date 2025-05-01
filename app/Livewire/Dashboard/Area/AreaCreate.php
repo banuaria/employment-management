@@ -29,10 +29,17 @@ class AreaCreate extends Component
     {
         $validated = $this->validate([
             'name'  => ['required', 'string', 'max:255'],
-            'area'  => ['required', 'string', 'max:255'],
+            'area'   => ['required', 'string', 'max:255', 'unique:area_payrolls,area'],
             'umk'  => ['required', 'numeric'],
             'total_harian'  => ['nullable', 'numeric'],
         ]);
+
+        //check area in area_payrolls
+        $exists = AreaPayroll::where('area', $validated['area'])->exists();
+        if ($exists) {
+            $this->dispatch('alert-failure', title: 'Area Already Exists');
+            return;
+        }
 
         $area = AreaPayroll::create($validated);
 
