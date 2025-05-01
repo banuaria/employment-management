@@ -182,11 +182,25 @@ class EmployeeImport extends Component
 
     private function convertExcelDate($value)
     {
+        // If it's a numeric Excel date
         if (is_numeric($value)) {
-            return Date::excelToDateTimeObject($value)->format('Y-m-d');
+            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
         }
-        return $value; 
+
+        // Handle custom string format like '20/03.2025'
+        if (preg_match('/^\d{2}\/\d{2}\.\d{4}$/', $value)) {
+            // Convert 20/03.2025 to 20-03-2025 for parsing
+            $value = str_replace('/', '-', str_replace('.', '-', $value));
+            $date = \DateTime::createFromFormat('d-m-Y', $value);
+            if ($date) {
+                return $date->format('Y-m-d');
+            }
+        }
+
+        // Return original if it can't be parsed
+        return $value;
     }
+
     
     public function store()
     {
