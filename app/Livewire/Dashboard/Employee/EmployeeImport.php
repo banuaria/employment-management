@@ -102,8 +102,11 @@ class EmployeeImport extends Component
                 continue;
             }
 
+            $area = AreaPayroll::where('area', $row['area_id'])->first();
+            $areaId = $area ? $area->id : null;
+
             // 3. Validasi duplikat (NIK, Vendor, Status) dalam file
-            $pairKey = $nik . '|' . $vendorName . '|' . $status . '|' . $row['area'];
+            $pairKey = $nik . '|' . $vendorName . '|' . $status . '|' . $areaId;
             if (isset($filePairs[$pairKey])) {
                 $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file (karyawan '$nameEmp').";
                 continue;
@@ -149,7 +152,7 @@ class EmployeeImport extends Component
                 ->where('nik', $nik)
                 ->where('vendor_id', $vendorId)
                 ->where('status', $status)
-                ->where('area_id', $row['area'] ?? null)
+                ->where('area_id', $areaId)
                 ->exists();
     
             if ($existsInPivot) {
