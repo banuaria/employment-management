@@ -108,7 +108,7 @@ class EmployeeImport extends Component
             // 3. Validasi duplikat (NIK, Vendor, Status) dalam file
             $pairKey = $nik . '|' . $vendorName . '|' . $status . '|' . $areaId;
             if (isset($filePairs[$pairKey])) {
-                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, dan status $status sudah ada dalam file (karyawan '$nameEmp').";
+                $this->errors[] = "Error pada baris " . ($i + 1) . ": Kombinasi NIK $nik, vendor $vendorName, area $area, dan status $status sudah ada dalam file (karyawan '$nameEmp').";
                 continue;
             }
 
