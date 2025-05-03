@@ -5,6 +5,7 @@ namespace App\Livewire\Dashboard\Employee;
 use App\Models\AreaPayroll;
 use App\Models\EmployeeMaster;
 use App\Models\Vendor;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -64,8 +65,16 @@ class EmployeeEdit extends Component
             'status'  => ['required', 'string', 'max:255'],
             'join_date'  => ['required', 'date'],
             'resign_date'  => ['nullable', 'date'],
-            'nik'  => ['required', 'numeric'],
             'area_id'  => ['required', 'numeric'],
+            'nik' => [
+            'required',
+            'numeric',
+            Rule::unique('employee_masters')->where(fn ($query) => 
+                $query->where('area_id', $this->area_id)
+                      ->where('status', $this->status)
+            ),
+        ],
+            
         ]);
 
         $employeID->update($validated);

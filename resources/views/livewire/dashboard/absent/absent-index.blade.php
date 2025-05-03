@@ -4,7 +4,7 @@
             <div class="w-full">
                 <div class="flex justify-between items-center space-x-4 mb-4">
                     <div>
-                        {{-- <button wire:click="$dispatch('open-modal', { name: 'create-employee-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Create employee</button> --}}
+                        {{-- <button wire:click="$dispatch('open-modal', { name: 'create-absent-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Create Absent</button> --}}
                         <button wire:click="$dispatch('open-modal', { name: 'import-absent-modal' })" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Import</button>
                         {{-- <button wire:click="export" type="button" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest transition ease-in-out duration-1500">Export</button> --}}
                     </div>
@@ -159,6 +159,24 @@
         </div>
         <div class="flex-1 overflow-auto x-modal-content">
             <livewire:dashboard.absent.absent-edit @absentEdited="$refresh" />
+        </div>
+    </x-modal>
+
+    <x-modal name="create-absent-modal" closable="false" maxWidth="lg">
+        <div class="flex justify-between items-start mb-4 space-x-4">
+            <h4 class="font-semibold text-gray-600 pt-1 uppercase">
+                Create absent
+            </h4>
+            <button
+                wire:click="$dispatch('close-modal', { name: 'create-absent-modal' })"
+                type="button"
+                class="text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 p-2 rounded-full inline-flex items-center"
+            >
+                <x-icon-close class="w-4 h-4"></x-icon-close>
+            </button>
+        </div>
+        <div class="flex-1 overflow-auto x-modal-content">
+            <livewire:dashboard.absent.absent-create @absentCreated="$refresh" />
         </div>
     </x-modal>
 </div>
