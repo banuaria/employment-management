@@ -51,9 +51,9 @@
                 type="button"
                 class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.product.*') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
             >
-                <x-icon-box-seam class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-box-seam>
-                MessUpload
-                <div class="w-full flex justify-between items-center">
+                <x-icon-box-seam class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4"></x-icon-box-seam>
+                Mass upload
+                <div class="w-auto flex justify-between items-center">
                     <span class="ml-3 text-sm"></span>
                     <x-icon-caret-down class="w-3.5 h-3.5"></x-icon-caret-down>
                 </div>
@@ -187,7 +187,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.lainya') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Lainya</span>
+                        <span class="ml-3 text-sm">Lainnya</span>
                         </button>
                     </a>
                 </li>

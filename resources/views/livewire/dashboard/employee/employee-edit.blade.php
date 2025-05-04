@@ -73,7 +73,7 @@
                     <option value="{{ $id }}">{{ $name }}</option>
                 @endforeach
             </select>
-            <p class="text-xs text-gray-400 mt-2">Vendor terpilih: {{ $vendor_id }}</p>
+            <p class="text-xs text-gray-400 mt-2">Vendor terpilih: {{ $vendorName }}</p>
             <x-input-error :messages="$errors->get('vendor_id')" class="mt-2" />
         </div>
         <div class="flex space-x-4 mt-4">

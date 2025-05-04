@@ -16,12 +16,13 @@ class EmployeeEdit extends Component
     public $status;
     public $join_date;
     public $resign_date;
-    public $vendor_id;
-    public $vendors = [];
     public $nik;
     public string $name = '';
     public int $area_id;
     public $areas = [];
+    public int $vendor_id;
+    public $vendors = [];
+    public $vendorName;
 
     #[On('close-modal')]
     public function closeModal()
@@ -39,6 +40,7 @@ class EmployeeEdit extends Component
         $this->status  = $employeID->status;
         // vendor
         $this->vendor_id = $employeID->vendor_id;
+        $this->vendorName = Vendor::where('id', $this->vendor_id)->pluck('name');
         $this->vendors = Vendor::pluck('name', 'id')->toArray();      
       
         $this->join_date = $employeID->join_date;
@@ -66,6 +68,7 @@ class EmployeeEdit extends Component
             'join_date'  => ['required', 'date'],
             'resign_date'  => ['nullable', 'date'],
             'area_id'  => ['required', 'numeric'],
+            'vendor_id' => ['required'],
             'nik' => [
             'required',
             'numeric',

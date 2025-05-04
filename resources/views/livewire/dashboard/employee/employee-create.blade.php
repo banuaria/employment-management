@@ -23,6 +23,19 @@
             </select>
             <x-input-error :messages="$errors->get('area_id')" class="mt-2" />
         </div>
+
+         <!-- Area -->
+         <div class="mt-4">
+            <x-input-label for="vendor-employee-create" :value="__('Vendor')" />
+            <select wire:model="vendor_id" id="vendor-employee-create" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="" disabled selected>Select Vendor</option>
+                @foreach ($vendor as $id => $name)
+                    <option value="{{ $id }}">{{ $name }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('area_id')" class="mt-2" />
+        </div>
+
         <!-- Client -->
         <div class="mt-4">
             <x-input-label for="client-employee-create" :value="__('Client')" />

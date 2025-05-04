@@ -176,7 +176,9 @@
                                     @foreach ($employMaster as $key => $value)
                                         <tr class="bg-white border-b">
                                             @php
-                                                if ($value->client == 'SECURITY' || $value->client == 'OFFICE BOY') {
+                                               if ($value->client == 'All Project') {
+                                                    $salary = 150000;
+                                                } elseif ($value->client == 'SECURITY' || $value->client == 'OFFICE BOY') {
                                                     $salary = $value->area->umk;
                                                 } else {
                                                     // Driver
@@ -186,16 +188,18 @@
                                                         $salary = $value->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
                                                     }
                                                 }
+
                                                 if ($value->status == 3) {
-                                                    $calt = $value->absent->where('month_year',$selectedMonthYear . '-01')->where('status',$value->status)->sum('absent');
-                                                    // dd($calt, $$value->area->total_harian);
+                                                    $calt = $value->absent->where('month_year', $selectedMonthYear . '-01')->where('status', $value->status)->sum('absent');
                                                     $salary = ($value->area->total_harian * $calt) ?? $value->area->total_harian;
                                                 } else {
                                                     // Driver
-                                                    if ($value->area->umk >= 4000000) {
-                                                        $salary = $value->area->umk * 0.80; // Jika UMK di atas 4.000.000, dikali 80%
-                                                    } else {
-                                                        $salary = $value->area->umk * 0.90; // Jika UMK di bawah 4.000.000, dikali 90%
+                                                    if ($value->client != 'All Project') { // Jangan timpa jika sudah "All Project"
+                                                        if ($value->area->umk >= 4000000) {
+                                                            $salary = $value->area->umk * 0.80;
+                                                        } else {
+                                                            $salary = $value->area->umk * 0.90;
+                                                        }
                                                     }
                                                 }
                                             $perMonth = $value->absent->where('status', $value->status)->first()?->total_days_in_month['total_month_employee'] ?? 00;

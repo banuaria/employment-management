@@ -15,9 +15,9 @@ class AbsentMonthlies extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'month_year',
         'employee_id',
         'vendor_id',
-        'month_year',
         'status',
         'absent',
         'bonus_absent',
@@ -64,10 +64,13 @@ class AbsentMonthlies extends Model
 
     public function getIncentiveAmountAttribute()
     {
-        if($this->employeeMaster->status == 'HARIAN') {
+        if ($this->employeeMaster->client == 'All Project') {
+            $salary = optional($this->employeeMaster->area)->umk;
+            $baseIncentive = 150000;
+        } elseif ($this->employeeMaster->status == '1') {
             $salary = optional($this->employeeMaster->area)->total_harian; 
             $baseIncentive = $salary;
-        }else{
+        } else {
             $salary = optional($this->employeeMaster->area)->umk;
             $baseIncentive = ($salary >= 4000000) ? 200000 : 100000; // Logika insentif dasar
         }

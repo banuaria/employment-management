@@ -143,7 +143,9 @@
                                             // Gaji dasar berdasarkan client
                                             if ($employee->client == 'SECURITY' || $employee->client == 'OFFICE BOY') {
                                                 $salary = $umk;
-                                            } else {
+                                            }elseif ($value->client == 'All Project'){
+                                                $salary = 150000;
+                                            }else {
                                                 $salary = $umk >= 4000000 ? $umk * 0.80 : $umk * 0.90;
                                             }
 

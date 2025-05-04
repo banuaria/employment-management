@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard\Employee;
 
 use App\Models\AreaPayroll;
 use App\Models\EmployeeMaster;
+use App\Models\Vendor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
@@ -19,6 +20,8 @@ class EmployeeCreate extends Component
     public string $name = '';
     public $areas = [];
     public $area_id;
+    public $vendor = [];
+    public $vendor_id;
 
     #[On('close-modal')]
     public function closeModal()
@@ -30,6 +33,7 @@ class EmployeeCreate extends Component
     public function mount()
     {
         $this->areas = AreaPayroll::pluck('area', 'id');
+        $this->vendor = Vendor::pluck('name', 'id');
     }
 
     public function render()
@@ -46,12 +50,14 @@ class EmployeeCreate extends Component
             'join_date'  => ['required', 'date'],
             'resign_date'  => ['nullable', 'date'],
             'area_id'  => ['required', 'numeric'],
+            'vendor_id' => ['required'],
             'nik' => [
             'required',
             'numeric',
             Rule::unique('employee_masters')->where(fn ($query) => 
                 $query->where('area_id', $this->area_id)
                       ->where('status', $this->status)
+                      ->where('vendor_id', $this->vendor_id)
             ),
         ],
             
