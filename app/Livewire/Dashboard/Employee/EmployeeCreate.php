@@ -47,7 +47,7 @@ class EmployeeCreate extends Component
             'name'  => ['required', 'string', 'max:255'],
             'client'  => ['required', 'string', 'max:255'],
             'status'  => ['required', 'string', 'max:255'],
-            'join_date'  => ['required', 'date'],
+            'join_date'   => ['required', 'date', 'before_or_equal:today'],
             'resign_date'  => ['nullable', 'date'],
             'area_id'  => ['required', 'numeric'],
             'vendor_id' => ['required'],

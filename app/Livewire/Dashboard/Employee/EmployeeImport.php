@@ -102,7 +102,7 @@ class EmployeeImport extends Component
                 continue;
             }
 
-            $area = AreaPayroll::where('area', $row['area_id'])->first();
+            $area = AreaPayroll::where('area', $row['area'])->first();
             $areaId = $area ? $area->id : null;
 
             // 3. Validasi duplikat (NIK, Vendor, Status) dalam file

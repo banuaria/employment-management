@@ -117,11 +117,11 @@
                                     <tr class="bg-white border-b">
                                         <td class="px-4 py-3 border text-center w-0"><div class="py-1.5">{{ $employMaster->firstItem() + $key }}</div></td>
                                         <td class="px-4 py-3 border-r">{{ $value->nik }}</td>
-                                        <td class="px-4 py-3 border-r">
+                                        <td class="px-4 py-3 border-r uppercase">
                                           {{$value->vendors->name}}
                                         </td>
-                                        <td class="px-4 py-3 border-r">{{ $value->client }}</td>    
-                                        <td class="px-4 py-3 border-r">{{ $value->name }}</td>
+                                        <td class="px-4 py-3 border-r uppercase">{{ $value->client }}</td>    
+                                        <td class="px-4 py-3 border-r uppercase">{{ $value->name }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->join_date ? \Carbon\Carbon::parse( $value->join_date )->translatedFormat('M d, Y') : '-'  }}</td>
                                         <td class="px-4 py-3 border-r">{{ $value->resign_date ? \Carbon\Carbon::parse( $value->resign_date )->translatedFormat('M d, Y') : '-'  }}</td>
                                     

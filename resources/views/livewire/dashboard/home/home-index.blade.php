@@ -71,19 +71,19 @@
                                         Join Date
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Resign Date
-                                    </th>
-                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Client
+                                        RESIGN DATE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Status+Area
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
+                                        Status
+                                    </th>
+                                    <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         NIK
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Name
+                                        Driver Name
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Area
@@ -92,46 +92,46 @@
                                         Total Gaji Pokok
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Lembur
+                                        OVERTIME
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Standby
+                                        STANDBY ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Makan
+                                        MEAL ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang MEL
+                                        MEAL MEL
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Unit
+                                        MEAL Unit
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Loading
+                                        MEAL Loading
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus Kehadiran
+                                        ATTENDANCE BONUSES
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus/Denda Kebersihan 
+                                        BONUSES/PENALTY CLEANING
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus/Denda SLA
+                                        BONUSES/PENALTY SLA
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus/Denda BBM
+                                        BONUSES/PENALTY BBM
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Retribusi
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Insentif Tomorow
+                                        INSENTIF TOMORO
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Lain-lain
+                                        OTHERS
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Selisih Bulan Lalu
+                                        DIFFERENCE LAST MONTH
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         JHT
@@ -152,7 +152,7 @@
                                         Total BPJS
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Potongan Gaji
+                                        CUT SALARY
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         Total Budget
@@ -208,15 +208,15 @@
                                             $totalSalary = ($salary/$perMonth)*$absentEmployee;
                                             // dd($salary,$perMonth,$absentEmployee);
                                             @endphp
-                                            <td class="px-4 py-3 border-r">{{ $value->vendors->name }}</td>
-                                            <td class="px-4 py-3 border-r">{{ $value->client }}</td>
+                                            <td class="px-4 py-3 border-r uppercase">{{ $value->vendors->name }}</td>
+                                            <td class="px-4 py-3 border-r uppercase">{{ $value->client }}</td>
                                             <td class="px-4 py-3 border-r">{{ $value->join_date ? \Carbon\Carbon::parse( $value->join_date )->translatedFormat('M d, Y') : '-' }}</td>
                                             <td class="px-4 py-3 border-r">{{ $value->resign_date ? \Carbon\Carbon::parse( $value->resign_date )->translatedFormat('M d, Y') : '-'  }}</td>
-                                            <td class="px-4 py-3 border-r">{{ $value->client }}</td>
-                                            <td class="px-4 py-3 border-r">{{ $value->status_name . $value->area->area }}</td>
+                                            <td class="px-4 py-3 border-r uppercase">{{ $value->status_name . $value->area->area }}</td>
+                                            <td class="px-4 py-3 border-r uppercase">{{ $value->status_name}}</td>
                                             <td class="px-4 py-3 border-r">{{ $value->nik }}</td>
-                                            <td class="px-4 py-3 border-r">{{ $value->name }}</td>
-                                            <td class="px-4 py-3 border-r">{{ $value->area->area }}</td>
+                                            <td class="px-4 py-3 border-r uppercase">{{ $value->name }}</td>
+                                            <td class="px-4 py-3 border-r uppercase">{{ $value->area->area }}</td>
                                             <td class="px-4 py-3 border-r"> 
                                                 {{ 'Rp' . number_format($totalSalary, 0, ',', '.') }}
                                                 {{-- {{$salary .'+'. $perMonth .'+'. $absentEmployee}} --}}

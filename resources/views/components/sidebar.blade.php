@@ -188,7 +188,7 @@
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.lainya') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
                         <span class="ml-3 text-sm">Lainnya</span>
-                        </button>
+                        </button>   
                     </a>
                 </li>
             </ul>
@@ -305,41 +305,64 @@
                 </li>
             </ul> --}}
 
-            <a href="{{ route('cms.employee') }}" wire:navigate>
-                <button
-                    type="button"
-                    class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.employee') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
-                >
-                    <span class="flex items-center">
-                        <x-icon-robot class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-robot>
-                        Employee
-                    </span>
-                </button>
-            </a>
+            
+        <button
+            id="setting-sidebar-dropdown-button"
+            data-collapse-toggle="setting-sidebar-dropdown-item"
+            aria-controls="setting-sidebar-dropdown-item"
+            type="button"
+            class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.product.*') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
+        >
+        <x-icon-gear class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-gear>
+            Setting
+            <div class="w-auto flex justify-between items-center">
+                <span class="ml-3 text-sm"></span>
+                <x-icon-caret-down class="w-3.5 h-3.5"></x-icon-caret-down>
+            </div>
+        </button>
+        <ul id="setting-sidebar-dropdown-item" class="{{ request()->routeIs('cms.product.*') ? '' : 'hidden' }} text-sm space-y-1" aria-labelledby="products-sidebar-dropdown-button">
+            <li>
+                <a href="{{ route('cms.vendor') }}" wire:navigate>
+                    <button
+                        type="button"
+                        class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.vendor') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
+                    >
+                        <span class="ml-3 text-sm">
+                            {{-- <x-icon-gear class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-gear> --}}
+                            Vendor
+                        </span>
+                    </button>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('cms.area') }}" wire:navigate>
+                    <button
+                        type="button"
+                        class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.area') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
+                    >
+                        <span class="ml-3 text-sm">
+                            {{-- <x-icon-geo class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-geo> --}}
+                            Area
+                        </span>
+                    </button>
+                </a>
+            </li>
+            <li>
+                <a href="{{ route('cms.employee') }}" wire:navigate>
+                    <button
+                        type="button"
+                        class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.employee') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
+                    >
+                        <span class="ml-3 text-sm">
+                            {{-- <x-icon-robot class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-robot> --}}
+                            Employee
+                        </span>
+                    </button>
+                </a>
+            </li>
+        </ul>
 
-            <a href="{{ route('cms.vendor') }}" wire:navigate>
-                <button
-                    type="button"
-                    class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.vendor') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
-                >
-                    <span class="flex items-center">
-                        <x-icon-gear class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-gear>
-                        Vendor
-                    </span>
-                </button>
-            </a>
-
-            <a href="{{ route('cms.area') }}" wire:navigate>
-                <button
-                    type="button"
-                    class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.area') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
-                >
-                    <span class="flex items-center">
-                        <x-icon-geo class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-4 w-4"></x-icon-geo>
-                        Area
-                    </span>
-                </button>
-            </a>
+            
 
             <a href="{{ route('cms.users') }}" wire:navigate>
                 <button

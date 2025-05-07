@@ -64,19 +64,22 @@ class EmployeeEdit extends Component
         $validated = $this->validate([
             'name'  => ['required', 'string', 'max:255'],
             'client'  => ['required', 'string', 'max:255'],
-            'status'  => ['required', 'string', 'max:255'],
+            'status'  => ['required', 'max:255'],
             'join_date'  => ['required', 'date'],
-            'resign_date'  => ['nullable', 'date'],
+            'join_date'   => ['required', 'date', 'before_or_equal:today'],
             'area_id'  => ['required', 'numeric'],
             'vendor_id' => ['required'],
-            'nik' => [
-            'required',
-            'numeric',
-            Rule::unique('employee_masters')->where(fn ($query) => 
-                $query->where('area_id', $this->area_id)
-                      ->where('status', $this->status)
-            ),
-        ],
+            'nik'         => [
+                'required',
+                'numeric',
+                Rule::unique('employee_masters')
+                    ->where(fn ($query) => $query
+                        ->where('area_id', $this->area_id)
+                        ->where('status', $this->status)
+                        ->where('vendor_id', $this->vendor_id)
+                    )
+                    ->ignore($employeID ?? null), // ✅ ini pengecualiannya
+            ],
             
         ]);
 
