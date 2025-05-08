@@ -89,7 +89,7 @@
                                         Area
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Total Gaji Pokok
+                                        BASIC SALARY
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         OVERTIME
@@ -101,13 +101,13 @@
                                         MEAL ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        MEAL MEL
+                                        MEAL MEL ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        MEAL Unit
+                                        MEAL UNIT ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        MEAL Loading
+                                        MEAL LOADING ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         ATTENDANCE BONUSES
@@ -122,7 +122,7 @@
                                         BONUSES/PENALTY BBM
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Retribusi
+                                        Retribution
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         INSENTIF TOMORO

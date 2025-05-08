@@ -23,50 +23,50 @@
                                         Gateway
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Gaji Pokok
+                                        BASIC SALARY
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Lembur
+                                        OVERTIME
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Standby
+                                        STANDBY ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Makan
+                                        MEAL ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang MEL
+                                        MEAL MEL ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Unit
+                                        MEAL UNIT ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Uang Loading
+                                        MEAL LOADING ALLOWANCE
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus Kehadiran
+                                        ATTENDANCE BONUSES
                                     </th>
                                     
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus/Denda Kebersihan
+                                        BONUSES/PENALTY CLEANING
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus/Denda SLA
+                                        BONUSES/PENALTY SLA
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Bonus/Denda BBM
+                                        BONUSES/PENALTY BBM
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Retribusi
+                                        Retribution
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Insentif Tomoro
+                                        INSENTIF TOMORO
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Lain-lain
+                                        Others
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
-                                        Selisih Bulan Lalu
+                                        DIFFERENCE LAST MONTH
                                     </th>
                                     <th rowspan="1" class="px-6 py-3 border text-center whitespace-nowrap">
                                         BPJS
