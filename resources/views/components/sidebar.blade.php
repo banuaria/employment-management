@@ -75,7 +75,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.lembur') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Lembur</span>
+                        <span class="ml-3 text-sm"> Overtime</span>
                         </button>
                     </a>
                 </li>
@@ -85,7 +85,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.makan') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Makan</span>
+                        <span class="ml-3 text-sm"> Meal</span>
                         </button>
                     </a>
                 </li>
@@ -106,7 +106,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.insentif') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Insentif</span>
+                        <span class="ml-3 text-sm"> Insentif Tomoro</span>
                         </button>
                     </a>
                 </li>
@@ -126,7 +126,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.bonus') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Bonus/Denda BBM</span>
+                        <span class="ml-3 text-sm"> Bonuses/Penalty BBM</span>
                         </button>
                     </a>
                 </li>
@@ -136,7 +136,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.clean') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Clean</span>
+                        <span class="ml-3 text-sm"> Cleaning</span>
                         </button>
                     </a>        
                 </li>
@@ -146,7 +146,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.denda') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Bonus/Denda SLA</span>
+                        <span class="ml-3 text-sm"> Bonuses/Penalty SLA</span>
                         </button>
                     </a>        
                 </li>
@@ -157,7 +157,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.cutsalary') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Cut Salary Month</span>
+                        <span class="ml-3 text-sm"> Cut Salary</span>
                         </button>
                     </a>
                 </li>
@@ -167,7 +167,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.bpjs') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> BPJS Employee</span>
+                        <span class="ml-3 text-sm"> BPJS</span>
                         </button>
                     </a>
                 </li>
@@ -177,7 +177,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.previous') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm"> Previous Month</span>
+                        <span class="ml-3 text-sm"> Difference Last Month</span>
                         </button>
                     </a>
                 </li>
@@ -187,7 +187,7 @@
                             type="button"
                             class="w-full flex items-center px-2 py-1.5 text-sm hover:text-gray-700 hover:font-bold hover:bg-indigo-100 rounded-md group {{ request()->routeIs('cms.lainya') ? 'bg-indigo-100 text-indigo-600 font-bold' : 'text-gray-700' }}"
                         >
-                        <span class="ml-3 text-sm">Lainnya</span>
+                        <span class="ml-3 text-sm"> Others</span>
                         </button>   
                     </a>
                 </li>
